@@ -1,4 +1,4 @@
 Deadline
 ========
 
-A fast, simple web framework for PHP 5.3+
+A speedy, fast, simple web framework for PHP 5.3+
