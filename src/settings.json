@@ -1,0 +1,9 @@
+{
+	"live": false,
+	"template": "deadline",
+	"database": {
+		"dsn": null,
+		"user": null,
+		"pass": null
+	}
+}

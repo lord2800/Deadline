@@ -1,0 +1,25 @@
+<p>Recent Posts</p>
+<p>
+	<div>
+		<tal:block repeat="post posts">
+			<div class="row-fluid">
+			<div class="span12">
+			<div class="btn-group pull-right">
+				<a class="btn btn-mini dropdown-toggle btn-${php: post.published ? 'success' : 'warning'}" data-toggle="dropdown" href="#">
+					Actions&nbsp;<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu" tal:define="status php: post.published ? 'unpublish' : 'publish'">
+					<li><a href="link://blog/${status}/${post/id}" tal:content="php: ucfirst(status)" /></li>
+					<li><a href="link://blog/edit/${post/id}">Edit</a></li>
+				</ul>
+			</div>
+			&nbsp;
+			<a href="link://blog/entry/${post/id}">
+				${post/title}
+			</a>
+			<br tal:condition="not: repeat/post/end" />
+			</div>
+			</div>
+		</tal:block>
+	</div>
+</p>

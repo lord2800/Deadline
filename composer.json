@@ -1,0 +1,15 @@
+{
+    "name": "lord2800/deadline",
+    "description": "Speedy PHP 5.3+ framework for simple website building",
+    "require": {
+        "phptal/phptal": "dev-master",
+        "gabordemooij/redbean": "v3.3.6"
+    },
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Jeff Hubbard",
+            "email": "jelhubbard@gmail.com"
+        }
+    ]
+}

@@ -1,0 +1,126 @@
+<tal:block metal:define-macro="empty-page">
+	<!DOCTYPE html>
+	<html lang="${lang}">
+		<tal:block metal:use-macro="page-defaults.tal/head" />
+		<body>
+			<tal:block metal:define-slot="content" />
+			<tal:block metal:use-macro="page-defaults.tal/footer" />
+			<tal:block metal:use-macro="page-defaults.tal/foot" />
+			<tal:block metal:define-slot="page-scripts" />
+		</body>
+	</html>
+</tal:block>
+
+<tal:block metal:define-macro="header-page">
+	<!DOCTYPE html>
+	<html lang="${lang}">
+		<tal:block metal:use-macro="page-defaults.tal/head" />
+		<body>
+			<tal:block metal:use-macro="page-defaults.tal/header" />
+			<div class="container-fluid">
+				<div class="row-fluid" id="body">
+					<tal:block metal:define-slot="content" />
+				</div>
+			</div>
+			<tal:block metal:use-macro="page-defaults.tal/footer" />
+			<tal:block metal:use-macro="page-defaults.tal/foot" />
+			<tal:block metal:define-slot="page-scripts" />
+		</body>
+	</html>
+</tal:block>
+
+<tal:block metal:define-macro="short-header-page">
+	<!DOCTYPE html>
+	<html lang="${lang}">
+		<tal:block metal:use-macro="page-defaults.tal/head" />
+		<body>
+			<tal:block metal:use-macro="page-defaults.tal/header-short" />
+			<div class="container-fluid">
+				<div class="row-fluid" id="body">
+					<tal:block metal:define-slot="content" />
+				</div>
+			</div>
+			<tal:block metal:use-macro="page-defaults.tal/footer" />
+			<tal:block metal:use-macro="page-defaults.tal/foot" />
+			<tal:block metal:define-slot="page-scripts" />
+		</body>
+	</html>
+</tal:block>
+
+<tal:block metal:define-macro="content-page">
+	<!DOCTYPE html>
+	<html lang="${lang}">
+		<tal:block metal:use-macro="page-defaults.tal/head" />
+		<body>
+			<div class="container-fluid">
+				<div class="row-fluid" id="body">
+					<tal:block metal:define-slot="content" />
+				</div>
+			</div>
+			<tal:block metal:use-macro="page-defaults.tal/footer" />
+			<tal:block metal:use-macro="page-defaults.tal/foot" />
+			<tal:block metal:define-slot="page-scripts" />
+		</body>
+	</html>
+</tal:block>
+
+<tal:block metal:define-macro="head">
+    <head>
+        <title tal:content="title | default">Default</title>
+        <link href="template://bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+        <link href="template://pagedown/wmd-styles.css" rel="stylesheet" media="screen" />
+		<link href="template://style.css" rel="stylesheet" media="screen" />
+		<tal:block metal:define-slot="page-styles" />
+		<link href='http://fonts.googleapis.com/css?family=Paprika' rel='stylesheet' type='text/css' />
+		<link href='http://fonts.googleapis.com/css?family=Racing+Sans+One' rel='stylesheet' type='text/css' />
+	</head>
+</tal:block>
+
+<tal:block metal:define-macro="foot">
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script> 
+	<script src="template://bootstrap/js/bootstrap.min.js"></script>
+</tal:block>
+
+<tal:block metal:define-macro="header">
+	<div id="header-bar">
+		<div class="row-fluid">
+			<div class="span8 offset2 rounded" id="header-img" style="background-image: url('${path: headerImage | string: template://images/sky.jpg}')">
+				<a href="link://home" class="title-link"><h1 id="title" tal:content="siteTitle | default">
+					Deadline
+				</h1></a>
+				<h2 id="tagline" tal:content="siteTagline | default">
+					Fast, Simple, Reliable. Choose three.
+				</h2>
+			</div>
+		</div>
+	</div>
+</tal:block>
+
+<tal:block metal:define-macro="header-short">
+	<div id="header-bar-short">
+		<div class="row-fluid">
+			<div class="span8 offset2 rounded" id="header-short">
+				<a href="link://home" class="title-link"><h1 id="title-short" tal:content="siteTitle | default">
+					Deadline
+				</h1></a>
+				<h2 id="tagline-short" tal:content="siteTagline | default">
+					Fast, Simple, Reliable. Choose three.
+				</h2>
+			</div>
+		</div>
+	</div>
+</tal:block>
+
+<tal:block metal:define-macro="footer">
+	<div id="footer-bar" class="row-fluid">
+		<tal:block condition="not: hideSignonBox">
+			<tal:block condition="currentUser/isEmpty">
+				<tal:block metal:use-macro="profile/macros.tal/signon-shortbox" />
+			</tal:block>
+			<tal:block condition="not: currentUser/isEmpty">
+				<tal:block metal:use-macro="profile/macros.tal/signout-shortbox" />
+			</tal:block>
+		</tal:block>
+		<p class="muted">Copyright &copy; 2012 Deadline CMS</p>
+	</div>
+</tal:block>

@@ -1,0 +1,40 @@
+<tal:block metal:use-macro="page-defaults.tal/short-header-page">
+	<tal:block metal:fill-slot="content">
+		<div class="well span6 offset3" tal:condition="not: user">
+			<h2>User not found!</h2>
+		</div>
+		<div class="userbox well span6 offset3" tal:condition="user">
+			<img class="img-rounded pull-right" src="//gravatar.com/avatar/${php: md5(trim(user.email))}?s=128" />
+			<p class="lead">
+				<span data-type="editable" data-for=".displayName">${user/displayName}</span>
+				<input type="text" class="displayName" value="${user/displayName}" tal:condition="not: currentUser/isEmpty" />
+			</p>
+			<dl class="dl-horizontal">
+				<dt>user name</dt>
+				<dd>${user/username}</dd>
+				<dt>email</dt>
+				<dd>
+					<span data-type="editable" data-for=".email">${user/email}</span>
+					<input type="text" class="email" value="${user/email}" tal:condition="not: currentUser/isEmpty" />
+				</dd>
+				<dt>member since</dt>
+				<dd>${human-date: user/created}</dd>
+			</dl>
+			<p>Is a</p>
+				<ul>
+					<li tal:repeat="role user/getRoles">
+						<a href="link://role/${role}" tal:content="role" />
+					</li>
+				</ul>
+		</div>
+	</tal:block>
+	<tal:block metal:fill-slot="page-scripts">
+		<script src="template://jquery.editable.js"></script>
+		<script tal:condition="not: currentUser/isEmpty">
+			$('body').editables({
+				onFreeze: function () {
+				}
+			});
+		</script>
+	</tal:block>
+</tal:block>
