@@ -4,7 +4,8 @@
     "require": {
         "phptal/phptal": "dev-master",
         "gabordemooij/redbean": "v3.3.6",
-	"analog/analog": "dev-master"
+	"analog/analog": "dev-master",
+	"cbednarski/php-markdown": "dev-master"
     },
     "minimum-stability": "dev",
     "authors": [

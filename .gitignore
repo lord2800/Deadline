@@ -4,3 +4,6 @@ langs.txt
 thirdparty
 stats
 webroot
+vendor
+build
+composer.lock

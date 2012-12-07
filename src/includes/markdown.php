@@ -1,7 +1,7 @@
 <?php
-require_once('deadline://vendor/markdown/Markdown/Text.php');
+require_once('deadline://vendor/cbednarski/php-markdown/src/MarkdownParser.php');
 
 class markdown {
-	public static function parse($text) { return (string)new Markdown\Text($text); }
+	public static function parse($text) { return MarkdownParser::parse($text); }
 }
 ?>
