@@ -7,6 +7,7 @@ if(array_key_exists('XDEBUG_DISABLE', $_GET)) {
 	xdebug_disable();
 }
 
+require_once('fix-realpath.php');
 require_once('autoload.php');
 
 function main() {

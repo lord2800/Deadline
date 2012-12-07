@@ -1,6 +1,6 @@
 <?php
 
-require_once("deadline://thirdparty/PHPTAL/PHPTAL.php");
+require_once("deadline://vendor/phptal/phptal/classes/PHPTAL.php");
 
 function plural($s, $c) { return $c > 1 ? $s . 's' : $s; }
 

@@ -5,11 +5,13 @@ abstract class Response {
 	public function __construct() {}
 
 	public function getFragment($encoding = 'UTF-8') {}
+	public function getPasswordInstance() {}
+	public function getStorage() {}
 	public function prepare(Request $request) {}
 	public function output() {}
 	public function redirect($url) {}
-	private function sendHeader($name, $value) {}
-	private function sendHeaders() {}
+	protected function sendHeader($name, $value) {}
+	protected function sendHeaders() {}
 	public function setHeader($name, $value, $replace = true) {}
 	public function setExpiryTime($time = 0) {}
 	public function setCacheControl($type = 'public', $time = 3600, $revalidate = true) {}

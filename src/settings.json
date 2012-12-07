@@ -2,8 +2,9 @@
 	"live": false,
 	"template": "deadline",
 	"database": {
-		"dsn": null,
+		"dsn": "sqlite:///var/www/deadlinecms.com/deadline.db3",
 		"user": null,
 		"pass": null
-	}
+	},
+	"videoPath": "/mnt/media/TV Shows"
 }

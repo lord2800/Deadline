@@ -1,5 +1,5 @@
 <?php
-require_once('deadline://thirdparty/Markdown/Text.php');
+require_once('deadline://vendor/markdown/Markdown/Text.php');
 
 class markdown {
 	public static function parse($text) { return (string)new Markdown\Text($text); }

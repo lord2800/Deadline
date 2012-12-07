@@ -58,5 +58,17 @@
 	"/blog/:?page": {
 		"controller": "Blog",
 		"method": "index"
+	},
+	"/video/list": {
+		"controller": "Video",
+		"method": "videos"
+	},
+	"/video/file": {
+		"controller": "Video",
+		"method": "file"
+	},
+	"/video/watch": {
+		"controller": "Video",
+		"method": "show"
 	}
 }

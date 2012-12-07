@@ -21,12 +21,12 @@ class User extends \RedBean_SimpleModel {
 		$_SESSION['forceupdate'] = time();
 	}
 	public static function identify($name, $pass, $remember = false) {
-		/*$last = \DateTime::createFromFormat('U', 0);
-		$now = new \DateTime();
+		/*$last = 0;
+		$now = time();
 		if(array_key_exists('last_attempt', $_SESSION)) {
 			$last = $_SESSION['last_attempt'];
 		}
-		$diff = $now->format('U') - $last->format('U');
+		$diff = $now - $last;
 
 		if($diff > 30) {
 			$_SESSION['failed'] = 0;
@@ -54,7 +54,7 @@ class User extends \RedBean_SimpleModel {
 			} else {
 				$_SESSION['failed'] = 1;
 			}
-			$_SESSION['last_attempt'] = new \DateTime();*/
+			$_SESSION['last_attempt'] = time();*/
 			return false;
 		}
 	}

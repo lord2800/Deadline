@@ -1,5 +1,5 @@
 <?php
-require_once('deadline://thirdparty/rb.php');
+require_once('deadline://vendor/gabordemooij/redbean/RedBean/redbean.inc.php');
 
 class ModelFormatter implements RedBean_IModelFormatter {
 	public function formatModel($model) { return 'Deadline\\' . $model; }
