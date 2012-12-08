@@ -6,7 +6,11 @@ class Storage {
 	private $tainted = false;
 	private $file = '';
 
+	private static $instance;
+	public static function current() { return static::$instance; }
+
 	public function __construct() {
+		static::$instance = $this;
 		Autosave::register(array(&$this, 'autosave'));
 	}
 	public function autosave() { if($this->tainted && $this->file != '') { $this->save($this->file); } }

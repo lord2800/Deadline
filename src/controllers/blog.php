@@ -12,23 +12,26 @@ class Blog {
 		);
 		R::preload($posts, array('user'));
 
-		$response->view->template = 'blog/index.tal';
-		$response->view->title = 'Recent entries';
-		$response->view->posts = $posts;
-		$response->view->nextPage = $page+1;
-		$response->view->prevPage = $page-1;
-		$response->view->pageCount = ceil(R::count(static::$blogBean) / static::$countPerPage);
+		$view = $response->getView($request);
+		$view->template = 'blog/index.tal';
+		$view->title = 'Recent entries';
+		$view->posts = $posts;
+		$view->nextPage = $page+1;
+		$view->prevPage = $page-1;
+		$view->pageCount = ceil(R::count(static::$blogBean) / static::$countPerPage);
 
 		$response->setCacheControl();
 		$response->setExpiryTime(new \DateTime('+15 minutes'));
+		return $view;
 	}
 
 	public function entry($request, $args, $response) {
 		$entry = R::load(static::$blogBean, (int)$args['id']);
 		if($entry->isEmpty() || $entry->mode != 'published') $entry = null;
 
-		$response->view->template = 'blog/entry.tal';
-		$response->view->post = $entry;
+		$view = $response->getView($request);
+		$view->template = 'blog/entry.tal';
+		$view->post = $entry;
 
 		$response->setCacheControl();
 		if($entry != null) {
@@ -36,20 +39,23 @@ class Blog {
 			$response->setModifiedTime($entry->published);
 			$response->setEtag(md5($entry->author . $entry->published));
 		}
+		return $view;
 	}
 
 	public function edit($request, $args, $response) {
 		if($request->verb == 'GET') {
 			$id = $args['id'];
+			$view = $response->getView($request);
 			if($id != null) {
 				$post = R::load(static::$blogBean, $id);
-				$response->view->post = $post;
-				$response->view->title = $post->isEmpty() ? 'Create a new post' : 'Edit ' . $post->title;
+				$view->post = $post;
+				$view->title = $post->isEmpty() ? 'Create a new post' : 'Edit ' . $post->title;
 			} else {
-				$response->view->title = 'Create a new post';
+				$view->title = 'Create a new post';
 			}
-			$response->view->template = 'blog/edit.tal';
+			$view->template = 'blog/edit.tal';
 			$response->setCacheControl();
+			return $view;
 		} else if($request->verb == 'POST') {
 			$id = $request->input['post']['id'];
 			$post = R::load(static::$blogBean, $id);
@@ -68,12 +74,14 @@ class Blog {
 
 	public function publish($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$response->view->template = 'confirm.tal';
-			$response->view->title = 'Publish post?';
-			$response->view->action = 'publish this post';
-			$response->view->data = $args['id'];
-			$response->view->returnUrl = array_key_exists('return', $args) ? $args['return'] : '';
+			$view = $response->getView($request);
+			$view->template = 'confirm.tal';
+			$view->title = 'Publish post?';
+			$view->action = 'publish this post';
+			$view->data = $args['id'];
+			$view->returnUrl = array_key_exists('return', $args) ? $args['return'] : '';
 			$response->setCacheControl('no-cache');
+			return $view;
 		} else if($request->verb == 'POST') {
 			$id = (int)$request->input['post']['data'];
 			$result = $request->input['post']['result'];
@@ -96,12 +104,14 @@ class Blog {
 
 	public function unpublish($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$response->view->template = 'confirm.tal';
-			$response->view->title = 'Unpublish post?';
-			$response->view->action = 'unpublish this post';
-			$response->view->data = $args['id'];
-			$response->view->returnUrl = $args['return'];
+			$view = $response->getView($request);
+			$view->template = 'confirm.tal';
+			$view->title = 'Unpublish post?';
+			$view->action = 'unpublish this post';
+			$view->data = $args['id'];
+			$view->returnUrl = $args['return'];
 			$response->setCacheControl('no-cache');
+			return $view;
 		} else if($request->verb == 'POST') {
 			$id = (int)$request->input['post']['data'];
 			$result = $request->input['post']['result'];
@@ -124,12 +134,14 @@ class Blog {
 
 	public function delete($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$response->view->template = 'confirm.tal';
-			$response->view->title = 'Please confirm';
-			$response->view->action = 'delete this post';
-			$response->view->data = $args['id'];
-			$response->view->returnUrl = $args['return'];
+			$view = $response->getView($request);
+			$view->template = 'confirm.tal';
+			$view->title = 'Please confirm';
+			$view->action = 'delete this post';
+			$view->data = $args['id'];
+			$view->returnUrl = $args['return'];
 			$response->setCacheControl('no-cache');
+			return $view;
 		} else if($request->verb == 'POST') {
 			$id = (int)$request->input['post']['data'];
 			$result = $request->input['post']['result'];

@@ -11,8 +11,8 @@ class HtmlView implements View {
 					 ->setForceReparse($reparse)
 					 ->setPhpCodeDestination('deadline://cache')
 					 ->setTemplateRepository('deadline://templates/' . $template)
-					 ->addPreFilter(new CSSPreFilter())
-					 ->addPreFilter(new JSPreFilter())
+		//			 ->addPreFilter(new CSSPreFilter())
+		//			 ->addPreFilter(new JSPreFilter())
 					 ->addPreFilter(new PHPTAL_PreFilter_StripComments())
 					 ->addPreFilter(new PHPTAL_PreFilter_Normalize())
 					 ->addPreFilter(new PHPTAL_PreFilter_Compress())
@@ -34,7 +34,7 @@ class HtmlView implements View {
 	}
 }
 
-// HACK: force the PHPTAL class to load to enable its' own autoloader
+// HACK: force the PHPTAL class to load to enable its' own autoloader for PHPTAL_* classes
 class tal extends PHPTAL {}
 
 class CSSPreFilter extends PHPTAL_PreFilter {
@@ -66,7 +66,7 @@ class PostFilter implements PHPTAL_Filter {
 			}, $code);
 		$code = preg_replace_callback('/link:\/\/([^"]+)/Uim',
 			function ($m) {
-				return substr($this->base, 5) . '/index.php/' . $m[1];
+				return substr($this->base, 5) . '/' . $m[1];
 			}, $code);
 		return $code;
 	}

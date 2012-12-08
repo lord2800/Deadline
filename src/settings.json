@@ -6,5 +6,9 @@
 		"user": null,
 		"pass": null
 	},
+	"security": {
+		"algo": "Blowfish",
+		"costFactor": 7
+	},
 	"videoPath": "/mnt/media/TV Shows"
 }

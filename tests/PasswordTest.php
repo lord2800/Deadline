@@ -4,33 +4,40 @@ require_once('password.php');
 
 class PasswordTest extends PHPUnit_Framework_TestCase {
 	public function testBuild() {
-		$password = new Deadline\Password();
-		return $password;
+		Deadline\Password::init();
 	}
 	/**
 	 * @depends testBuild
 	 */
-	public function testHash($password) {
+	public function testHash() {
 		$pass = '123abc';
-		$salt = $password->gen_salt();
-		$hash = $password->hash($pass, $salt);
+		$salt = Deadline\Password::current()->gen_salt();
+		$hash = Deadline\Password::current()->hash($pass, 7, $salt);
 		$this->assertEquals('$2y$07' . $salt . '\\$2U4GQgU/lOtM', $hash);
-		return $password;
 	}
 	/**
 	 * @depends testBuild
 	 */
-	public function testVerify($password) {
+	public function testVerify() {
 		$pass = '123abc';
-		$hash = $password->hash($pass);
-		$this->assertTrue($password->verify($pass, $hash));
+		$hash = Deadline\Password::current()->hash($pass);
+		$this->assertTrue(Deadline\Password::current()->verify($pass, $hash));
 	}
 	/**
 	 * @depends testBuild
 	 */
-	public function testRehash($password) {
+	public function testFail() {
 		$pass = '123abc';
-		$hash = $password->hash($pass);
-		$this->assertTrue($password->need_rehash($hash, 'SHA512'));
+		$hash = Deadline\Password::current()->hash($pass);
+		$pass = 'abc123';
+		$this->assertFalse(Deadline\Password::current()->verify($pass, $hash));
+	}
+	/**
+	 * @depends testBuild
+	 */
+	public function testRehash() {
+		$pass = '123abc';
+		$hash = Deadline\Password::current()->hash($pass);
+		$this->assertTrue(Deadline\Password::current()->need_rehash($hash, 'SHA512'));
 	}
 }

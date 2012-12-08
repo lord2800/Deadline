@@ -7,18 +7,24 @@ class User extends \RedBean_SimpleModel {
 	private static $userBean = 'user';
 	private static $roleBean = 'role';
 
+	private static $cost = 7, $algo = 'Blowfish';
 	public static function getCurrent() {
 		$id = array_key_exists('id', $_SESSION) ? $_SESSION['id'] : null;
 		$user = R::load(static::$userBean, $id);
 		return $user;
 	}
-	public static function init() {
+	public static function init($algo = 'Blowfish', $cost = 7) {
+		Password::init($algo);
+		static::$algo = $algo;
+		static::$cost = $cost;
+
 		session_cache_limiter('');
 		$params = session_get_cookie_params();
 		session_set_cookie_params(0, $params['path'], $params['domain'], $params['secure'], true);
 		session_start();
+
 		// hack to force the session gc to not trigger for this session
-		$_SESSION['forceupdate'] = time();
+		$_SESSION['hack_forceupdate'] = time();
 	}
 	public static function identify($name, $pass, $remember = false) {
 		/*$last = 0;
@@ -41,7 +47,10 @@ class User extends \RedBean_SimpleModel {
 			return false;
 		}
 
-		if(HttpResponse::current()->getPasswordInstance()->verify($pass, $user->pass)) {
+		if(Password::current()->verify($pass, $user->pass)) {
+			if(Password::current()->need_rehash($user->pass, static::$algo, static::$cost)) {
+				$user->pass = Password::current()->hash($pass, static::$cost);
+			}
 			$_SESSION['id'] = $user->id;
 			$params = session_get_cookie_params();
 			$lifetime = $remember ? 4147200 : 0;
@@ -63,7 +72,7 @@ class User extends \RedBean_SimpleModel {
 		$user->username = $username;
 		$user->displayName = $display;
 		$user->email = $email;
-		$user->pass = HttpResponse::current()->getPasswordInstance()->hash($pass);
+		$user->pass = Password::current()->hash($pass, static::$cost);
 		$user->created = R::isoDateTime();
 		$role = static::getRole('user');
 		$user->sharedRole = array($role);

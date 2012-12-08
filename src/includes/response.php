@@ -5,10 +5,8 @@ abstract class Response {
 	public function __construct() {}
 
 	public function getFragment($encoding = 'UTF-8') {}
-	public function getPasswordInstance() {}
-	public function getStorage() {}
 	public function prepare(Request $request) {}
-	public function output() {}
+	public function output(\View $view) {}
 	public function redirect($url) {}
 	protected function sendHeader($name, $value) {}
 	protected function sendHeaders() {}

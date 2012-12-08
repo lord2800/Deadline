@@ -6,7 +6,9 @@ class Video {
 	public function videos($request, $args, $response) {
 		$path = $response->getStorage()->get('videoPath');
 		$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FS::NEW_CURRENT_AND_KEY | FS::SKIP_DOTS));
-		$response->view->template = 'video/list.tal';
+
+		$view = $response->getView($request);
+		$view->template = 'video/list.tal';
 
 		$videos = array();
 		foreach($files as $file) {
@@ -17,7 +19,8 @@ class Video {
 		}
 		usort($videos, function($a, $b) { return strnatcmp($a['name'], $b['name']); });
 
-		$response->view->videos = $videos;
+		$view->videos = $videos;
+		return $view;
 	}
 	public function show($request, $args, $response) {
 		$file = $request->input['get']['f'];
@@ -30,8 +33,11 @@ class Video {
 				'source' => 'link://video/file/?f=' . rawurlencode($file),
 				'type' => substr($mime, strpos($mime, '/')+1)
 			);
-			$response->view->template = 'video/view.tal';
-			$response->view->videos = array($video);
+
+			$view = $response->getView($request);
+			$view->template = 'video/view.tal';
+			$view->videos = array($video);
+			return $view;
 		}
 	}
 	public function file($request, $args, $response) {

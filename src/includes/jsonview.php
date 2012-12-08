@@ -8,8 +8,8 @@ class JsonView implements View {
 	private $encoding;
 	public function __construct($template, $base, $encoding, $reparse) {
 		$this->pretty = $reparse;
-		if($encoding != 'UTF-8') {
-			throw new \Exception('JSON views are only supported with UTF-8 encoding!"');
+		if(strcasecmp($encoding, 'UTF-8') !== 0) {
+			throw new \LogicException('JSON views are only supported with UTF-8 encoding!"');
 		}
 		$this->encoding = $encoding;
 	}

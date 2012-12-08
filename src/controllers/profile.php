@@ -8,27 +8,33 @@ class Profile {
 			if($response->getCurrentUser() != null) {
 				$response->redirect('/home');
 			} else {
-				$response->view->template = 'profile/signon.tal';
-				$response->view->title = 'Sign in';
-				$response->view->hideSignonBox = true;
+				$view = $response->getView($request);
+				$view->template = 'profile/signon.tal';
+				$view->title = 'Sign in';
+				$view->hideSignonBox = true;
+				return $view;
 			}
 		} else if($request->verb == 'POST') {
 			$post = $request->input['post'];
 			if(User::identify($post['login'], $post['pass'])) {
 				$response->redirect($post['returnUrl']);
 			} else {
-				$response->view->template = 'profile/signon.tal';
-				$response->view->title = 'Sign in';
-				$response->view->failed = true;
-				$response->view->onsigninpage = true;
+				$view = $response->getView($request);
+				$view->template = 'profile/signon.tal';
+				$view->title = 'Sign in';
+				$view->failed = true;
+				$view->onsigninpage = true;
+				return $view;
 			}
 		}
 	}
 	public function signout($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$response->view->template = 'confirm.tal';
-			$response->view->title = 'Sign out';
-			$response->view->action = 'sign out';
+			$view = $response->getView($request);
+			$view->template = 'confirm.tal';
+			$view->title = 'Sign out';
+			$view->action = 'sign out';
+			return $view;
 		} else if($request->verb == 'POST') {
 			session_destroy();
 			$response->redirect('/home');
@@ -36,8 +42,10 @@ class Profile {
 	}
 	public function signup($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$response->view->template = 'profile/signup.tal';
-			$response->view->title = 'Sign up';
+			$view = $response->getView($request);
+			$view->template = 'profile/signup.tal';
+			$view->title = 'Sign up';
+			return $view;
 		} else if($request->verb == 'POST') {
 			$post = $request->input['post'];
 			$user = User::register($post['username'], $post['display'], $post['email'], $post['password']);
@@ -47,17 +55,21 @@ class Profile {
 	public function edit($request, $args, $response) {
 		if($request->verb == 'GET') {
 			$user = User::find($args['profile'], true);
-			$response->view->template = 'profile/edit.tal';
-			$response->view->title = $user->displayName . ' > User profile';
-			$response->view->user = $user;
+			$view = $response->getView($request);
+			$view->template = 'profile/edit.tal';
+			$view->title = $user->displayName . ' > User profile';
+			$view->user = $user;
+			return $view;
 		} else if($request->verb == 'POST') {
 		}
 	}
 	public function role($request, $args, $response) {
-		$response->view->template = 'profile/roles.tal';
-		$response->view->title = 'Users in ' . $args['role'];
-		$response->view->users = User::getRole($args['role'], false)->sharedUser;
-		$response->view->role = $args['role'];
+		$view = $response->getView($request);
+		$view->template = 'profile/roles.tal';
+		$view->title = 'Users in ' . $args['role'];
+		$view->users = User::getRole($args['role'], false)->sharedUser;
+		$view->role = $args['role'];
+		return $view;
 	}
 }
 

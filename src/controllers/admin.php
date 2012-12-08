@@ -51,23 +51,27 @@ class Admin {
 	}
 
 	public function index($request, $args, $response) {
-		$response->view->template = 'admin/index.tal';
-		$response->view->widgets = $this->getWidgets($response);
+		$view = $response->getView($request);
+		$view->template = 'admin/index.tal';
+		$view->widgets = $this->getWidgets($response);
+		return $view;
 	}
 
 	public function page($request, $args, $response) {
 		$controller = ucfirst(strtolower($args['controller']));
 		$method = $args['method'];
 		$instance = new $controller();
+		$view = $response->getView($request);
 		$fragment = $response->getPartial();
 		$instance->$method($request, new Deadline\Container(), $fragment);
-		$response->view->template = 'admin/page.tal';
-		$response->view->content = $fragment->output();
+		$view->template = 'admin/page.tal';
+		$view->content = $fragment->output();
+		return $view;
 	}
 
-	public function finish($response) {
-		$response->view->controllers = $this->getMenus();
-		$response->view->hideSignonBox = true;
+	public function finish($view, $response) {
+		$view->controllers = $this->getMenus();
+		$view->hideSignonBox = true;
 	}
 }
 

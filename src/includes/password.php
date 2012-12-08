@@ -4,7 +4,17 @@ namespace Deadline;
 class Password {
 	private $algos;
 	private $algo;
+
+	private static $instance;
+	public static function current() { return static::$instance; }
+	public static function init($algo = 'Blowfish') {
+		static::$instance = new Password($algo);
+	}
+
 	public function gen_salt($algo = '') {
+		// Normally, mt_rand is not secure enough for hashing algoritms. However, in this
+		// case, we're not using it for its' hashing properties, but instead its' statistical
+		// randomness--the area it does excel in.
 		if($algo == '') {
 			$algo = $this->algos[$this->algo];
 		} else {
@@ -22,17 +32,14 @@ class Password {
 		}
 		return $salt;
 	}
-	public function hash($pass, $salt = '', $cost = 7) {
+	public function hash($pass, $cost = 7, $salt = '') {
 		$algo = $this->algos[$this->algo];
+		// TODO this check is broken for the SHA variants, they define their salt length as 0
 		if($algo['salt']['length'] != 0 && strlen($salt) != $algo['salt']['length']) {
-			if($salt != '') {
-				trigger_warning('Invalid salt length, generating a new salt...');
-			}
 			$salt = $this->gen_salt();
 		}
 		if($cost > $algo['cost']['maximum'] || $cost < $algo['cost']['minimum']) {
 			$cost = 7;
-			trigger_warning('Invalid cost value, setting cost to default of 7');
 		}
 		$salt = sprintf($algo['format'], ($cost * $algo['cost']['factor']), $salt);
 		// prepend the info about the pass so we can pull it apart later
@@ -44,19 +51,21 @@ class Password {
 		$attempt = crypt($pass, $existing);
 		return $attempt == $existing;
 	}
-	public function need_rehash($hash, $algo = '', $salt = '', $cost = 7) {
+	public function need_rehash($hash, $algo = '', $cost = 7, $salt = '') {
 		if($algo == '') {
 			$algo = $this->algo;
 		}
+		// TODO this is broken for the SHA variants, it won't correctly detect the cost factor
 		$current = array(
 			'algo' => substr($hash, 0, 4),
 			'cost' => (int)substr($hash, 4, 2),
 			'salt' => substr($hash, 6, 22)
 		);
 		return $current['algo'] != $this->algos[$algo]['tag'] ||
-			   $current['salt'] != $salt || $current['cost'] != $cost;
+			   ($salt != '' && $current['salt'] != $salt) ||
+			   $current['cost'] != $cost;
 	}
-	public function __construct($algo = 'Blowfish') {
+	private function __construct($algo) {
 		$this->algo = $algo;
 		$this->algos = array(
 			'Blowfish' => array(
@@ -99,6 +108,9 @@ class Password {
 				)
 			)
 		);
+		if(!array_key_exists($algo, $this->algos)) {
+			throw new \LogicException('Invalid algorithm!');
+		}
 	}
 }
 
