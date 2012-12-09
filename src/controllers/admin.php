@@ -41,7 +41,7 @@ class Admin {
 		foreach($this->findControllers() as $controller) {
 			$controller = ucfirst(strtolower($controller));
 			$instance = new $controller();
-			$fragment = $response->getPartial();
+			$fragment = new PartialHtmlView();
 			if(method_exists($instance, 'adminWidget')) {
 				$instance->adminWidget($fragment);
 				$widgets[] = array('name' => $controller, 'content' => $fragment->output());
@@ -51,7 +51,7 @@ class Admin {
 	}
 
 	public function index($request, $args, $response) {
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'admin/index.tal';
 		$view->widgets = $this->getWidgets($response);
 		return $view;
@@ -61,7 +61,7 @@ class Admin {
 		$controller = ucfirst(strtolower($args['controller']));
 		$method = $args['method'];
 		$instance = new $controller();
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$fragment = $response->getPartial();
 		$instance->$method($request, new Deadline\Container(), $fragment);
 		$view->template = 'admin/page.tal';

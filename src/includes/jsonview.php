@@ -3,24 +3,26 @@
 //namespace Deadline;
 
 class JsonView implements View {
-	private $vars = array();
-	private $pretty = false;
-	private $encoding;
-	public function __construct($template, $base, $encoding, $reparse) {
+	private $encoding, $vars = array(), $pretty = false;
+	public function __construct($encoding, $reparse) {
 		$this->pretty = $reparse;
 		if(strcasecmp($encoding, 'UTF-8') !== 0) {
 			throw new \LogicException('JSON views are only supported with UTF-8 encoding!"');
 		}
 		$this->encoding = $encoding;
 	}
+	public function prepare(Deadline\Response $response) {
+		$response->setHeader('content type', 'application/json; charset=' . $this->encoding);
+	}
 	public function output() {
 		$options = JSON_FORCE_OBJECT | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_TAG;
 		if($this->pretty) $options |= JSON_PRETTY_PRINT;
 		return json_encode($this->vars, $options);
 	}
-	public function getContentType() { return 'application/json; charset=' . $this->encoding; }
+	public function getTemplate() { return null; }
 	public function setTemplate($template) {}
-	public function setAll($vars) { $this->vars = $vars; }
+	public function __set($name, $value) { $this->vars[$name] = $value; }
+	public function __get($name) { return array_key_exists($name, $this->vars) ? $this->vars[$name] : null; }
 }
 
 ?>

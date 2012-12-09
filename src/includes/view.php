@@ -3,9 +3,10 @@
 //namespace Deadline;
 
 interface View {
-	public function __construct($template, $base, $encoding, $reparse);
+	public function __construct($encoding, $reparse);
+	public function prepare(Deadline\Response $response);
 	public function output();
-	public function getContentType();
+	public function getTemplate();
 	public function setTemplate($template);
 }
 

@@ -15,6 +15,26 @@ class Request {
 		$name = str_replace(' ', '_', strtoupper($name));
 		return array_key_exists($name, $this->env) ? $this->env[$name] : null;
 	}
+	private function getClientIP() {
+		$headers = array(
+			'HTTP_CLIENT_IP',
+			'HTTP_X_FORWARDED_FOR',
+			'HTTP_X_FORWARDED',
+			'HTTP_X_CLUSTER_CLIENT_IP',
+			'HTTP_FORWARDED_FOR',
+			'HTTP_FORWARDED',
+			'REMOTE_ADDR'
+		);
+		$ipFlags = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+		foreach($headers as $key) {
+			foreach(explode(',', $this->getenv($key)) as $ip) {
+				$ip = filter_var(trim($ip), FILTER_VALIDATE_IP, array('flags' => $ipFlags));
+				if($ip !== false) {
+					return $ip;
+				}
+			}
+		}
+	}
 
 	private function init() {
 		// put together the basic properties
@@ -64,6 +84,8 @@ class Request {
 		$this->props['port'] = $this->getenv('server port');
 		$this->props['uri'] = $this->getenv('request uri');
 		$this->props['path'] = $this->getenv('path info');
+		$this->props['requestUser'] = $this->getClientIP();
+
 		$this->props['query'] = array();
 		parse_str($this->getenv('query string'), $this->props['query']);
 

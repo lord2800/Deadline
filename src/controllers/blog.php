@@ -12,7 +12,7 @@ class Blog {
 		);
 		R::preload($posts, array('user'));
 
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'blog/index.tal';
 		$view->title = 'Recent entries';
 		$view->posts = $posts;
@@ -29,7 +29,7 @@ class Blog {
 		$entry = R::load(static::$blogBean, (int)$args['id']);
 		if($entry->isEmpty() || $entry->mode != 'published') $entry = null;
 
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'blog/entry.tal';
 		$view->post = $entry;
 
@@ -45,7 +45,7 @@ class Blog {
 	public function edit($request, $args, $response) {
 		if($request->verb == 'GET') {
 			$id = $args['id'];
-			$view = $response->getView($request);
+			$view = $response->getView();
 			if($id != null) {
 				$post = R::load(static::$blogBean, $id);
 				$view->post = $post;
@@ -74,7 +74,7 @@ class Blog {
 
 	public function publish($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$view = $response->getView($request);
+			$view = $response->getView();
 			$view->template = 'confirm.tal';
 			$view->title = 'Publish post?';
 			$view->action = 'publish this post';
@@ -104,7 +104,7 @@ class Blog {
 
 	public function unpublish($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$view = $response->getView($request);
+			$view = $response->getView();
 			$view->template = 'confirm.tal';
 			$view->title = 'Unpublish post?';
 			$view->action = 'unpublish this post';
@@ -134,7 +134,7 @@ class Blog {
 
 	public function delete($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$view = $response->getView($request);
+			$view = $response->getView();
 			$view->template = 'confirm.tal';
 			$view->title = 'Please confirm';
 			$view->action = 'delete this post';
@@ -147,7 +147,7 @@ class Blog {
 			$result = $request->input['post']['result'];
 			$return = $request->input['post']['returnUrl'];
 			if($return == '') {
-				$return = '/blog/index';
+				$return = '/blog';
 			}
 			if($result == 'confirm') {
 				$entry = R::load(static::$blogBean, $id);
@@ -166,7 +166,7 @@ class Blog {
 	public function adminMenu() {
 		return array(
 			'New Post' => 'link://blog/edit',
-			'View All Posts' => '/blog/index'
+			'View All Posts' => '/blog'
 		);
 	}
 	public function adminWidget($fragment) {
@@ -180,8 +180,8 @@ class Blog {
 			$entries[] = $entry;
 		}
 
-		$fragment->view->template = 'blog/widget.tal';
-		$fragment->view->posts = $entries;
+		$fragment->template = 'blog/widget.tal';
+		$fragment->posts = $entries;
 	}
 }
 

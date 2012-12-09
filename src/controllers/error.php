@@ -2,7 +2,7 @@
 
 class Error {
 	public static function error404($request, $response) {
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'error404.tal';
 		$view->pagetitle = 'Deadline > Not Found';
 		$view->title = 'Oops.';
@@ -16,7 +16,7 @@ class Error {
 		$response->output($view);
 	}
 	public static function error500($request, $response) {
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'error500.tal';
 		$view->pagetitle = 'Deadline > Not Found';
 		$view->title = '';

@@ -114,10 +114,10 @@
 <tal:block metal:define-macro="footer">
 	<div id="footer-bar" class="row-fluid">
 		<tal:block condition="not: hideSignonBox">
-			<tal:block condition="currentUser/isEmpty">
+			<tal:block condition="currentUser/isEmpty | true">
 				<tal:block metal:use-macro="profile/macros.tal/signon-shortbox" />
 			</tal:block>
-			<tal:block condition="not: currentUser/isEmpty">
+			<tal:block condition="not: currentUser/isEmpty | false">
 				<tal:block metal:use-macro="profile/macros.tal/signout-shortbox" />
 			</tal:block>
 		</tal:block>

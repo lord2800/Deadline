@@ -1,1 +1,0 @@
-Markdown-oo-php's license is in its own directory. Please see includes/Markdown/Text.php for more details.

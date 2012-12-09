@@ -8,7 +8,7 @@ class Profile {
 			if($response->getCurrentUser() != null) {
 				$response->redirect('/home');
 			} else {
-				$view = $response->getView($request);
+				$view = $response->getView();
 				$view->template = 'profile/signon.tal';
 				$view->title = 'Sign in';
 				$view->hideSignonBox = true;
@@ -19,7 +19,7 @@ class Profile {
 			if(User::identify($post['login'], $post['pass'])) {
 				$response->redirect($post['returnUrl']);
 			} else {
-				$view = $response->getView($request);
+				$view = $response->getView();
 				$view->template = 'profile/signon.tal';
 				$view->title = 'Sign in';
 				$view->failed = true;
@@ -30,7 +30,7 @@ class Profile {
 	}
 	public function signout($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$view = $response->getView($request);
+			$view = $response->getView();
 			$view->template = 'confirm.tal';
 			$view->title = 'Sign out';
 			$view->action = 'sign out';
@@ -42,7 +42,7 @@ class Profile {
 	}
 	public function signup($request, $args, $response) {
 		if($request->verb == 'GET') {
-			$view = $response->getView($request);
+			$view = $response->getView();
 			$view->template = 'profile/signup.tal';
 			$view->title = 'Sign up';
 			return $view;
@@ -55,7 +55,7 @@ class Profile {
 	public function edit($request, $args, $response) {
 		if($request->verb == 'GET') {
 			$user = User::find($args['profile'], true);
-			$view = $response->getView($request);
+			$view = $response->getView();
 			$view->template = 'profile/edit.tal';
 			$view->title = $user->displayName . ' > User profile';
 			$view->user = $user;
@@ -64,7 +64,7 @@ class Profile {
 		}
 	}
 	public function role($request, $args, $response) {
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'profile/roles.tal';
 		$view->title = 'Users in ' . $args['role'];
 		$view->users = User::getRole($args['role'], false)->sharedUser;

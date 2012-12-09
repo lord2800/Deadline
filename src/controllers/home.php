@@ -6,7 +6,7 @@ class home {
 		$response->setEtag('123abc');
 		$response->setModifiedTime(1353628608);
 
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'index.tal';
 		$view->pagetitle = 'Deadline > Index';
 		$view->title = 'Deadline CMS';
@@ -15,7 +15,7 @@ class home {
 		return $view;
 	}
 	public function test($request, $args, $response) {
-		$view = $response->getView($request);
+		$view = $response->getView();
 		$view->template = 'index.tal';
 		$view->pagetitle = 'Deadline > Index';
 		$view->title = 'Deadline CMS';

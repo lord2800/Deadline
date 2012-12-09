@@ -8,16 +8,16 @@
 			</tal:block>
 			<ul class="pager">
 				<li class="previous">
-					<a href="link://blog/index"><i class="icon-fast-backward"></i>&nbsp;First</a>
+					<a href="link://blog"><i class="icon-fast-backward"></i>&nbsp;First</a>
 				</li>
 				<li tal:condition="php: prevPage NE 0" class="previous">
-					<a href="link://blog/index/${prevPage}"><i class="icon-arrow-left"></i>&nbsp;Newer</a>
+					<a href="link://blog/${prevPage}"><i class="icon-arrow-left"></i>&nbsp;Newer</a>
 				</li>
 				<li class="next">
-					<a href="link://blog/index/${pageCount}"><i class="icon-fast-forward"></i>&nbsp;Last</a>
+					<a href="link://blog/${pageCount}">Last&nbsp;<i class="icon-fast-forward"></i></a>
 				</li>
 				<li tal:condition="php: nextPage LE pageCount" class="next">
-					<a href="link://blog/index/${nextPage}">Older&nbsp;<i class="icon-arrow-right"></i></a>
+					<a href="link://blog/${nextPage}">Older&nbsp;<i class="icon-arrow-right"></i></a>
 				</li>
 			</ul>
 		</div>
