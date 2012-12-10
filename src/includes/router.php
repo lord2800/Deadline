@@ -11,12 +11,14 @@ class Router {
 			uksort($this->routes, function ($a, $b) {
 			// TODO this is wrong, it should be counting the number of "hard" parameters
 			// before a "soft" parameter, and sorting by that number instead
-			$x = strpos($a, ':');
-			$y = strpos($b, ':');
-			if($x === false) return -1;
-			if($y === false) return 1;
-			if($x == $y) return 0;
-			return ($x > $y ? -1 : 1);
+			$partsa = array_values(array_filter(explode('/', $a)));
+			$i = count($partsa)-1;
+			while($partsa[$i--][0] != ':' && $i > -1);
+
+			$partsb = array_values(array_filter(explode('/', $b)));
+			$j = count($partsb)-1;
+			while($partsb[$j--][0] != ':' && $j > -1);
+			return $i == $j ? 0 : $i > $j ? -1 : 1;
 		});
 	}
 
@@ -93,6 +95,10 @@ class Router {
 	public function routeCount() { return count($this->routes); }
 
 	public function find(Request $request) {
+		echo '<pre>';
+		var_dump($this->routes);
+		echo '</pre>';
+		die();
 		// pick apart the url, find the route from that
 		$pathinfo = pathinfo($request->path);
 		$path = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
