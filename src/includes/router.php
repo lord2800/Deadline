@@ -95,10 +95,6 @@ class Router {
 	public function routeCount() { return count($this->routes); }
 
 	public function find(Request $request) {
-		echo '<pre>';
-		var_dump($this->routes);
-		echo '</pre>';
-		die();
 		// pick apart the url, find the route from that
 		$pathinfo = pathinfo($request->path);
 		$path = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
