@@ -5,7 +5,7 @@ use Deadline\User;
 class Profile {
 	public function signin($request, $args, $response) {
 		if($request->verb == 'GET') {
-			if($response->getCurrentUser() != null) {
+			if(User::current() != null) {
 				$response->redirect('/home');
 			} else {
 				$view = $response->getView();

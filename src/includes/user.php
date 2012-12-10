@@ -8,7 +8,7 @@ class User extends \RedBean_SimpleModel {
 	private static $roleBean = 'role';
 
 	private static $cost = 7, $algo = 'Blowfish';
-	public static function getCurrent() {
+	public static function current() {
 		$id = array_key_exists('id', $_SESSION) ? $_SESSION['id'] : null;
 		$user = R::load(static::$userBean, $id);
 		return $user;

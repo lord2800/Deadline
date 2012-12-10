@@ -61,7 +61,7 @@ class Blog {
 			$post = R::load(static::$blogBean, $id);
 
 			$post->title = $request->input['post']['posttitle'];
-			$post->user = $response->getCurrentUser();
+			$post->user = User::current();
 			$post->published = R::isoDateTime();
 			$post->content = $request->input['post']['postcontent'];
 			$post->cachedHtml = markdown::parse($post->content);

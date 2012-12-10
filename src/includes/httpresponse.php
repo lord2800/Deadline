@@ -9,8 +9,6 @@ class HttpResponse extends Response {
 	private static $instance;
 	public static function current() { return static::$instance; }
 
-	public function getCurrentUser() { return session_status() === PHP_SESSION_ACTIVE ? User::getCurrent() : null; }
-
 	public function __construct(Request $request) {
 		if(static::$instance != null) {
 			throw new \LogicException('There can be only one!');
@@ -45,7 +43,7 @@ class HttpResponse extends Response {
 		$view->siteTitle = $store->get('siteTitle');
 		$view->siteTagline = $store->get('siteTagline');
 		$view->headerImage = $store->get('headerImage');
-		$view->currentUser = $this->getCurrentUser();
+		$view->currentUser = User::current();
 		$view->currentUrl = $this->getRequest()->url;
 		$view->hideSignonBox = false;
 		return $view;

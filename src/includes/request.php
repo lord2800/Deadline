@@ -1,21 +1,25 @@
 <?php
 namespace Deadline;
 
-// TODO: turn this into a subclass of Container
-class Request {
+class Request extends Container {
 	private $env;
-	private $props = array();
 	private $headers = array();
 
 	public function __construct($env) {
 		$this->env = $env;
 		$this->init();
 	}
+	private function qualsort($a, $b) {
+		return $a['quality'] == $b['quality'] ? 0 :
+					$a['quality'] > $b['quality'] ? -1 : 1;
+	}
 	private function getenv($name) {
 		$name = str_replace(' ', '_', strtoupper($name));
-		return array_key_exists($name, $this->env) ? $this->env[$name] : null;
+		return isset($this->env[$name]) ? $this->env[$name] : null;
 	}
 	private function getClientIP() {
+		// unfortunately, we have to start with the least likely header and proceed down
+		// otherwise, we could cut this work down quite a bit
 		$headers = array(
 			'HTTP_CLIENT_IP',
 			'HTTP_X_FORWARDED_FOR',
@@ -25,10 +29,10 @@ class Request {
 			'HTTP_FORWARDED',
 			'REMOTE_ADDR'
 		);
-		$ipFlags = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+		$ipFlags = FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6;
 		foreach($headers as $key) {
 			foreach(explode(',', $this->getenv($key)) as $ip) {
-				$ip = filter_var(trim($ip), FILTER_VALIDATE_IP, array('flags' => $ipFlags));
+				$ip = filter_var(trim($ip), FILTER_VALIDATE_IP, $ipFlags);
 				if($ip !== false) {
 					return $ip;
 				}
@@ -38,73 +42,84 @@ class Request {
 
 	private function init() {
 		// put together the basic properties
-		$this->props['ssl'] = $this->getenv('https') == 'on' ? true : false;
+		$this->ssl = $this->getenv('https') == 'on' ? true : false;
 
-		$this->props['host'] = $this->getenv('server name');
-		$this->props['proto'] = $this->getenv('server protocol');
-		$this->props['verb'] = $this->getenv('request method');
-		$this->props['requestTime'] = \DateTime::createFromFormat('U', $this->getenv('request time'));
+		$this->host = $this->getenv('server name');
+		$this->proto = $this->getenv('server protocol');
+		$this->verb = $this->getenv('request method');
+		$this->requestTime = \DateTime::createFromFormat('U', $this->getenv('request time'));
 
-		$this->props['accept'] = explode(',', $this->getenv('http accept'));
-		foreach($this->props['accept'] as &$value) {
-			$quality = 1;
+		$accept = explode(',', $this->getenv('http accept'));
+		foreach($accept as &$value) {
+			$quality = 1.0;
 			$type = $value;
 			if(strpos($value, ';') !== false) {
 				list($type, $q) = explode(';', $value);
-				$quality = substr($q, 2);
+				$quality = floatval(substr($q, 2));
 			}
 			$value = array('type' => $type, 'quality' => $quality);
 		}
 		unset($value);
-		usort($this->props['accept'], function ($a, $b) { return $a['quality'] - $b['quality']; });
+		usort($accept, array($this, 'qualsort'));
+		$this->accept = $accept;
+		unset($accept);
+
+		$lang = explode(',', $this->getenv('http accept language'));
+		foreach($lang as &$value) {
+			$quality = 1.0;
+			$l = $value;
+			if(strpos($value, ';') !== false) {
+				list($l, $q) = explode(';', $value);
+				$quality = floatval(substr($q, 2));
+			}
+			$value = array('lang' => $l, 'quality' => $quality);
+		}
+		unset($value);
+		usort($lang, array($this, 'qualsort'));
+		$this->lang = $lang;
+		unset($lang);
 
 		$acceptEncoding = array_values(array_filter(explode(',', $this->getenv('http accept encoding'))));
 		array_walk($acceptEncoding, function(&$k) { $k = trim($k); });
-		$this->props['encoding'] = $acceptEncoding;
-		if(empty($this->props['encoding'])) $this->props['encoding'][] = 'none';
+		if(empty($acceptEncoding)) $acceptEncoding[] = 'none';
+		$this->encoding = $acceptEncoding;
+		unset($acceptEncoding);
 
-		$this->props['charset'] = array_values(array_filter(explode(',', $this->getenv('http accept charset'))));
-		if(empty($this->props['charset'])) $this->props['charset'][] = 'UTF-8';
+		$charset = array_values(array_filter(explode(',', $this->getenv('http accept charset'))));
+		array_walk($charset, function(&$k) { $k = trim($k); });
+		if(empty($charset)) $charset[] = 'UTF-8';
+		$this->charset = $charset;
+		unset($charset);
 
-		$this->props['lang'] = explode(',', $this->getenv('http accept language'));
-		foreach($this->props['lang'] as &$value) {
-			$quality = 1;
-			$lang = $value;
-			if(strpos($value, ';') !== false) {
-				list($lang, $q) = explode(';', $value);
-				$quality = substr($q, 2);
-			}
-			$value = array('lang' => $lang, 'quality' => $quality);
-		}
-		unset($value);
-		usort($this->props['accept'], function ($a, $b) { return $a['quality'] - $b['quality']; });
+		$this->referrer = $this->getenv('http referer');
+		$this->userAgent = $this->getenv('http user agent');
+		$this->port = $this->getenv('server port');
+		$this->uri = $this->getenv('request uri');
+		$this->path = $this->getenv('path info');
 
-		$this->props['referrer'] = $this->getenv('http referer');
-		$this->props['userAgent'] = $this->getenv('http user agent');
-		$this->props['port'] = $this->getenv('server port');
-		$this->props['uri'] = $this->getenv('request uri');
-		$this->props['path'] = $this->getenv('path info');
-		$this->props['requestUser'] = $this->getClientIP();
+		$query = array();
+		parse_str($this->getenv('query string'), $query);
+		$this->query = $query;
+		unset($query);
 
-		$this->props['query'] = array();
-		parse_str($this->getenv('query string'), $this->props['query']);
-
-		$this->props['input'] = array(
+		$this->input = array(
 			'get' => new Container($_GET),
 			'post' => new Container($_POST)
 		);
-		$this->props['requester'] = array(
-			'addr' => $this->getenv('remote addr'),
+		$ip = $this->getClientIP();
+		$this->requester = array(
+			'addr' => $ip,
 			'host' => $this->getenv('remote host')
+//			'resolved' => gethostbyaddr($ip)
 		);
-		$this->props['auth'] = array(
+		$this->auth = array(
 			'digest' => $this->getenv('php auth digest'),
 			'user' => $this->getenv('php auth user'),
 			'pass' => $this->getenv('php auth pw'),
 			'type' => $this->getenv('auth type')
 		);
 		$modified = $this->getenv('http if modified since');
-		$this->props['cache'] = array(
+		$this->cache = array(
 			'etag' => $this->getenv('http if none match'),
 			'modified' => $modified == null ? null : new \DateTime($modified)
 		);
@@ -118,24 +133,18 @@ class Request {
 		}
 
 		// build the full url now that we have all the constituent parts
-		$this->props['url'] = 'http';
-		$this->props['url'] .= $this->ssl ? 's' : '';
-		$this->props['url'] .= '://' . $this->host;
+		$this->url = 'http';
+		$this->url .= $this->ssl ? 's' : '';
+		$this->url .= '://' . $this->host;
 		if(($this->ssl && $this->port != '443') || ($this->port != '80'))
-			$this->props['url'] .= ':' . $this->port;
-		$this->props['url'] .= $this->uri;
+			$this->url .= ':' . $this->port;
+		$this->url .= $this->uri;
 		// clear the env, we don't need it now
 		unset($this->env);
 	}
 
-	public function __get($name) {
-		return array_key_exists($name, $this->props) ? $this->props[$name] : null;
-	}
-
 	public function getHeader($name) {
-		if(array_key_exists($name, $this->headers)) {
-			return $this->headers[$name];
-		} else return null;
+		return isset($this->headers[$name]) ? $this->headers[$name] : null;
 	}
 }
 
