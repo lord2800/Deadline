@@ -71,7 +71,7 @@ class HttpResponse extends Response {
 		if($this->cached) {
 			$this->setHeader('status', '304 Not Modified');
 		} else {
-			$hash = md5($this->request->requestUser . $this->request->requestTime->format('U'));
+			$hash = md5($this->request->requester['addr']);
 			$file = 'deadline://cache/' . 'page_' . $hash . '.html';
 
 			$content = $view->output();
