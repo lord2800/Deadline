@@ -39,5 +39,3 @@ class home {
 		ob_end_clean();
 	}
 }
-
-?>

@@ -13,5 +13,3 @@ class Container implements \ArrayAccess {
 	public function offsetUnset($offset) { if($this->offsetExists($offset)) unset($this->vars[$offset]); }
 	public function isEmpty() { return empty($this->vars); }
 }
-
-?>

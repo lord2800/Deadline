@@ -24,5 +24,3 @@ class JsonView implements View {
 	public function __set($name, $value) { $this->vars[$name] = $value; }
 	public function __get($name) { return array_key_exists($name, $this->vars) ? $this->vars[$name] : null; }
 }
-
-?>

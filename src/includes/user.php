@@ -135,7 +135,9 @@ class User extends \RedBean_SimpleModel {
 			$roleName = $role->name;
 		}
 		if($this->checkRole($roleName)) {
-			$this->bean->sharedRole = array_filter($this->bean->sharedRole, function ($r) use($role) { return $role->name == $r->name; });
+			$this->bean->sharedRole = array_filter($this->bean->sharedRole, function ($r) use($role) {
+				return $role->name == $r->name;
+			});
 			R::store($this);
 		}
 	}

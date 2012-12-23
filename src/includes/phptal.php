@@ -50,5 +50,3 @@ function phptal_tales_full_date($src, $nothrow) {
 function phptal_tales_markdown($src, $nothrow) {
 	return 'markdown(' . phptal_tales(trim($src), $nothrow) . ')';
 }
-
-?>

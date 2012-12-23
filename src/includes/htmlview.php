@@ -78,5 +78,3 @@ class PostFilter implements PHPTAL_Filter {
 		return $code;
 	}
 }
-
-?>

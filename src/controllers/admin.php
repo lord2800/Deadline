@@ -1,6 +1,7 @@
 <?php
 
 use FilesystemIterator as FS;
+use Deadline\User;
 
 class Admin {
 	private function findControllers() {
@@ -69,10 +70,11 @@ class Admin {
 		return $view;
 	}
 
-	public function finish($view, $response) {
+	public function setup($response) {
+		User::current()->requiresRole('administrator');
+	}
+	public function finish($response, $view) {
 		$view->controllers = $this->getMenus();
 		$view->hideSignonBox = true;
 	}
 }
-
-?>
