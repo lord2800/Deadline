@@ -47,5 +47,3 @@ class FragmentFilter implements \PHPTAL_Filter {
 		return $code;
 	}
 }
-
-?>

@@ -20,8 +20,7 @@ class Blog {
 		$view->prevPage = $page-1;
 		$view->pageCount = ceil(R::count(static::$blogBean) / static::$countPerPage);
 
-		$response->setCacheControl();
-		$response->setExpiryTime(new \DateTime('+15 minutes'));
+		$response->setCacheControl(900);
 		return $view;
 	}
 
@@ -184,5 +183,3 @@ class Blog {
 		$fragment->posts = $entries;
 	}
 }
-
-?>

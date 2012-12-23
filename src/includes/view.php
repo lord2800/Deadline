@@ -9,5 +9,3 @@ interface View {
 	public function getTemplate();
 	public function setTemplate($template);
 }
-
-?>

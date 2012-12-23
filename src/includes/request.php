@@ -147,5 +147,3 @@ class Request extends Container {
 		return isset($this->headers[$name]) ? $this->headers[$name] : null;
 	}
 }
-
-?>

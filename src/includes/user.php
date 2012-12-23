@@ -108,6 +108,11 @@ class User extends \RedBean_SimpleModel {
 		}
 		return $roles;
 	}
+	public function requiresRole($role) {
+		if(!$this->checkRole($role)) {
+			throw new AuthorizationException($role);
+		}
+	}
 	public function checkRole($role) {
 		return in_array($role, $this->getRoles());
 	}
@@ -130,8 +135,18 @@ class User extends \RedBean_SimpleModel {
 			$roleName = $role->name;
 		}
 		if($this->checkRole($roleName)) {
-			$this->bean->sharedRole = array_filter($this->bean->sharedRole, function ($r) use($role) { return $role->name == $r->name; });
+			$this->bean->sharedRole = array_filter($this->bean->sharedRole, function ($r) use($role) {
+				return $role->name == $r->name;
+			});
 			R::store($this);
 		}
+	}
+}
+
+class AuthorizationException extends \Exception {
+	protected $role;
+	public function __construct($role) {
+		$this->role = $role;
+		parent::__construct('You do not have the required permissions to access this resource');
 	}
 }

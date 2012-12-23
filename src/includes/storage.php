@@ -45,5 +45,3 @@ class Storage {
 		return count($this->store) == 0;
 	}
 }
-
-?>

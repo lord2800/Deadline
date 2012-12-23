@@ -49,7 +49,7 @@ class HttpResponse extends Response {
 		return $view;
 	}
 
-	public function prepare(Request $request, \View $view) {
+	public function prepare(Request $request, \View $view = null) {
 		if($this->etag != null && $this->etag == $request->cache['etag'] ||
 		   $this->modified != null && $this->modified == $request->cache['modified']) {
 		   $this->cached = true;
@@ -65,7 +65,9 @@ class HttpResponse extends Response {
 		}
 		$this->setHeader('content language', $this->lang);
 		$this->setHeader('connection', 'keep-alive');
-		$view->prepare($this);
+		if($view != null) {
+			$view->prepare($this);
+		}
 	}
 	public function output(\View $view) {
 		if($this->cached) {
@@ -161,5 +163,3 @@ class HttpResponse extends Response {
 		else { $this->modified = new \DateTime(); }
 	}
 }
-
-?>

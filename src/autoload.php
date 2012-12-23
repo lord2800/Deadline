@@ -22,13 +22,14 @@ class PathWrapper {
 		$phar = \Phar::running();
 		if(empty($phar)) {
 			// we're not running in phar mode--we can safely use realpath() to determine the full path
-			static::$real = static::$base = realpath(dirname(__FILE__));
+			static::$real = static::$base = realpath(__DIR__);
 		} else {
 			// we're running in phar mode, so the path is always phar-relative
 			static::$pharMode = true;
 			static::$base = 'phar://deadline.phar/';
 			static::$real = dirname(\Phar::running(false));
 		}
+		stream_wrapper_register(PathWrapper::$scheme, __CLASS__);
 	}
 	public function __construct() {}
 	public function __destruct() { $this->close(); }
@@ -164,7 +165,6 @@ class PathWrapper {
 }
 
 PathWrapper::init();
-stream_wrapper_register(PathWrapper::$scheme, __NAMESPACE__.'\PathWrapper');
 
 class LibraryFilter extends \FilterIterator {
 	public function accept() {
@@ -213,6 +213,7 @@ class Autoload {
 				static::$cache[$class] = $file;
 			}
 		}
+		spl_autoload_register(__CLASS__ . '::load');
 	}
 	public static function save() {
 		file_put_contents(static::$cacheFile, json_encode(static::$cache, JSON_FORCE_OBJECT));
@@ -240,7 +241,6 @@ class Autoload {
 			static::$cache[$fname] = $file;
 			require_once($file);
 		}
-		// TODO figure out if I can throw an exception for a missing class here
 	}
 	// well, this is mildly depressing. I spend a few hours working up an iterator approach
 	// to include searching, and it turns out to be no faster than scandir(). :(
@@ -273,7 +273,6 @@ class Autoload {
 }
 
 Autoload::init();
-spl_autoload_register(__NAMESPACE__.'\Autoload::load');
 Autosave::register(array('Deadline\Autoload', 'save'));
 
 function on_shutdown() {
@@ -283,5 +282,3 @@ function on_shutdown() {
 
 set_error_handler(function ($errno, $str, $file, $line, $context) { throw new \ErrorException($str, $errno, 0, $file, $line); });
 register_shutdown_function(__NAMESPACE__.'\on_shutdown');
-
-?>

@@ -72,5 +72,3 @@ class Profile {
 		return $view;
 	}
 }
-
-?>

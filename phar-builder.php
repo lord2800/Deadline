@@ -1,6 +1,6 @@
 <?php
 
-$root = dirname(__FILE__);
+$root = __DIR__;
 $source = $root . '/src';
 $output = $root . '/build';
 
@@ -21,6 +21,8 @@ Phar::webPhar('deadline.phar', 'index.php', 'index.php', array(), function() { r
 __HALT_COMPILER();
 END;
 
+// TODO use createDefaultStub with a cli interface as well as a web interface, and make the current
+// stub into the web interface
 $phar->setStub($stub);
 echo "Built {$output}/deadline.phar succesfully!\n";
 

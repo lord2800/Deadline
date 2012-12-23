@@ -30,5 +30,3 @@ class Error {
 		$response->output($view);
 	}
 }
-
-?>

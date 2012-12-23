@@ -23,5 +23,3 @@ class Memcache {
 	public function __construct($dsn) {
 	}
 }
-
-?>

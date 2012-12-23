@@ -8,17 +8,27 @@ class Router {
 	private static $cacheFile = 'deadline://cache/routes.cache';
 
 	private function sortRoutes() {
-			uksort($this->routes, function ($a, $b) {
-			// TODO this is wrong, it should be counting the number of "hard" parameters
-			// before a "soft" parameter, and sorting by that number instead
+		uksort($this->routes, function ($a, $b) {
 			$partsa = array_values(array_filter(explode('/', $a)));
-			$i = count($partsa)-1;
-			while($partsa[$i--][0] != ':' && $i > -1);
+			$i = 0;
+			$alen = count($partsa);
+			while($i < $alen && $partsa[$i][0] != ':') $i++;
 
 			$partsb = array_values(array_filter(explode('/', $b)));
-			$j = count($partsb)-1;
-			while($partsb[$j--][0] != ':' && $j > -1);
-			return $i == $j ? 0 : $i > $j ? -1 : 1;
+			$j = 0;
+			$blen = count($partsb);
+			while($j < $blen && $partsb[$j][0] != ':') $j++;
+
+			if($i == $j) {
+				if($alen > $blen) {
+					return 1;
+				} else if($alen < $blen) {
+					return -1;
+				}
+				return 0;
+			}
+			if($i > $j) return -1;
+			else return 1;
 		});
 	}
 
@@ -48,7 +58,8 @@ class Router {
 		$this->file = $file;
 	}
 	public function save($file) {
-		file_put_contents($file, json_encode($this->routes, 80 /* equivalent to JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES, used for compat with 5.3 */));
+		/* equivalent to JSON_FORCE_OBJECT | JSON_UNESCAPED_SLASHES, used for compat with 5.3 */
+		file_put_contents($file, json_encode($this->routes, 80));
 		$this->tainted = false;
 		$this->file = $file;
 	}
@@ -104,34 +115,37 @@ class Router {
 
 			$partcount = count($routeparts);
 			$urlcount = count($urlparts);
+			// remove optional parameters from the count
 			foreach($routeparts as $part) {
 				if($part[0] == ':' && $part[1] == '?') {
 					$partcount--;
 				}
 			}
+			// if the required parts of the route are longer than the url, it can't possibly match
 			if($partcount > $urlcount) {
 				continue;
 			}
 
 			$args = new Container();
-			foreach($urlparts as $i => $part) {
-				$component = ($i < count($routeparts) ? $routeparts[$i] : null);
-				// first, does the component match the part?
+			foreach($routeparts as $i => $component) {
+				$part = ($i < count($urlparts) ? $urlparts[$i] : null);
+				// if the component doesn't match the part and the component isn't a variable...
 				if($component != $part && $component[0] != ':') {
 					continue 2;
 				}
+				// does the component match the part?
 				if($component == $part) {
 					continue;
 				}
+				// it's a variable
 				if($component[0] == ':') {
-					// it's a variable
 					// is it optional?
 					if($component[1] == '?') {
 						// it's optional, capture it
 						$args[substr($component, 2)] = $part;
 					} else {
-						// it's not optional, fail the match if the component is null
-						if($component == null) {
+						// it's not optional, fail the match if the part is null
+						if($part == null) {
 							continue 2;
 						} else {
 							$args[substr($component, 1)] = $part;
@@ -146,5 +160,3 @@ class Router {
 		return null;
 	}
 }
-
-?>
