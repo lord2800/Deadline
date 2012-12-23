@@ -9,6 +9,10 @@ class Request extends Container {
 		$this->env = $env;
 		$this->init();
 	}
+	private function filter($var) {
+		$opts = FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_AMP;
+		return filter_var($var, FILTER_SANITIZE_STRING, $opts);
+	}
 	private function qualsort($a, $b) {
 		return $a['quality'] == $b['quality'] ? 0 :
 					$a['quality'] > $b['quality'] ? -1 : 1;
@@ -102,15 +106,23 @@ class Request extends Container {
 		$this->query = $query;
 		unset($query);
 
-		$this->input = array(
-			'get' => new Container($_GET),
-			'post' => new Container($_POST)
+		$input = array(
+			'get' => new Container(),
+			'post' => new Container(),
+			'cookie' => new Container()
 		);
+		foreach(array('get' => $_GET, 'post' => $_POST, 'cookie' => $_COOKIE) as $name => $array) {
+			foreach($array as $key => $value) {
+				$input[$name][$key] = $this->filter($value);
+			}
+		}
+		$this->input = $input;
+		unset($input);
+
 		$ip = $this->getClientIP();
 		$this->requester = array(
 			'addr' => $ip,
 			'host' => $this->getenv('remote host')
-//			'resolved' => gethostbyaddr($ip)
 		);
 		$this->auth = array(
 			'digest' => $this->getenv('php auth digest'),

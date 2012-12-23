@@ -2,32 +2,25 @@
 namespace Deadline;
 
 class Router {
-	private $routes = array();
+	private $routes = array(), $meta = array();
 	private $tainted = false;
 	private $file = '';
 	private static $cacheFile = 'deadline://cache/routes.cache';
 
 	private function sortRoutes() {
 		uksort($this->routes, function ($a, $b) {
-			$partsa = array_values(array_filter(explode('/', $a)));
-			$i = 0;
-			$alen = count($partsa);
-			while($i < $alen && $partsa[$i][0] != ':') $i++;
+			$ameta = $this->meta[$a];
+			$bmeta = $this->meta[$b];
 
-			$partsb = array_values(array_filter(explode('/', $b)));
-			$j = 0;
-			$blen = count($partsb);
-			while($j < $blen && $partsb[$j][0] != ':') $j++;
-
-			if($i == $j) {
-				if($alen > $blen) {
+			if($ameta['length'] == $bmeta['length']) {
+				if($ameta['count'] > $bmeta['count']) {
 					return 1;
-				} else if($alen < $blen) {
+				} else if($ameta['count'] < $bmeta['count']) {
 					return -1;
 				}
 				return 0;
 			}
-			if($i > $j) return -1;
+			if($ameta['length'] > $bmeta['length']) return -1;
 			else return 1;
 		});
 	}
@@ -46,11 +39,25 @@ class Router {
 		}
 	}
 
+	private function addRoute($route, $handler) {
+		$this->routes[$route] = $handler;
+
+		$parts = array_values(array_filter(explode('/', $route)));
+		$len = count($parts);
+		for($i = 0; $i < $len && $parts[$i][0] != ':'; $i++);
+
+		$this->meta[$route] = array(
+			'parts' => $parts,
+			'count' => $len,
+			'length' => $i
+		);
+	}
+
 	public function load($file) {
 		if(file_exists($file)) {
 			$routes = json_decode(file_get_contents($file));
 			foreach($routes as $route => $handler) {
-				$this->routes[$route] = $handler;
+				$this->addRoute($route, $handler);
 			}
 			$this->sortRoutes();
 			$this->tainted = false;
@@ -69,7 +76,7 @@ class Router {
 			// we're binding a bunch of routes
 			foreach($routes as $route => $handler) {
 				if($handler['controller'] != '' && $handler['method'] != '') {
-					$this->routes[$route] = $handler;
+					$this->addRoute($route, $handler);
 					$this->tainted = true;
 				} else {
 					throw new \Exception("Route '$routes' is in an invalid format");
@@ -78,7 +85,7 @@ class Router {
 		} else {
 			// we're binding a single route
 			if($handler['controller'] != '' && $handler['method'] != '') {
-				$this->routes[$routes] = $handler;
+				$this->addRoute($routes, $handler);
 				$this->tainted = true;
 			} else {
 				throw new \Exception("Route '$routes' is in an invalid format");
@@ -111,9 +118,9 @@ class Router {
 		$path = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
 		$urlparts = array_values(array_filter(explode('/', $path)));
 		foreach($this->routes as $route => $handler) {
-			$routeparts = array_values(array_filter(explode('/', $route)));
+			$routeparts = $this->meta[$route]['parts'];
 
-			$partcount = count($routeparts);
+			$partcount = $this->meta[$route]['count'];
 			$urlcount = count($urlparts);
 			// remove optional parameters from the count
 			foreach($routeparts as $part) {
