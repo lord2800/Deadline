@@ -12,7 +12,6 @@ namespace Deadline;
 use \FilesystemIterator as FS;
 
 class PathWrapper {
-	// TODO make it check $real if we're in phar mode first, then resort to inside the phar detection
 	private static $base, $pharMode = false, $real = '';
 	public static $scheme = 'deadline';
 	private $res = null;
@@ -24,7 +23,7 @@ class PathWrapper {
 			// we're not running in phar mode--we can safely use realpath() to determine the full path
 			static::$real = static::$base = realpath(__DIR__);
 		} else {
-			// we're running in phar mode, so the path is always phar-relative
+			// we're running in phar mode, so we should try a phar-relative path if not a real path
 			static::$pharMode = true;
 			static::$base = 'phar://deadline.phar/';
 			static::$real = dirname(\Phar::running(false));
@@ -36,7 +35,17 @@ class PathWrapper {
 
 	public static function resolve($path, $real = false) {
 		if(static::$base == '') { throw new \Exception('Base path not set!'); }
-		return ($real ? static::$real : static::$base) . substr($path, 10);
+		$result = '';
+		$path = substr($path, 10);
+		if($real) {
+			// we're doing something with a real-world path, skip the test
+			return static::$real . $path;
+		}
+		if(static::$pharMode && (file_exists(static::$real . $path) || is_dir(static::$real . $path))) {
+			return static::$real . $path;
+		} else {
+			return static::$base . $path;
+		}
 	}
 	private function join($path) { return static::resolve($path); }
 	private function hasflag($value, $flag) { return ($value & $flag) == $flag; }
@@ -200,12 +209,10 @@ class IncludeIterator implements \Iterator {
 class Autoload {
 	private static $cache;
 	private static $cacheFile = 'deadline://cache/autoload.cache';
+	private static $tainted = false;
 
 	public static function init() {
 		// populate the cache
-		if(!is_dir(dirname(static::$cacheFile))) {
-			mkdir(dirname(static::$cacheFile), 0700);
-		}
 		static::$cache = array();
 		if(file_exists(static::$cacheFile)) {
 			$cache = json_decode(file_get_contents(static::$cacheFile));
@@ -216,7 +223,12 @@ class Autoload {
 		spl_autoload_register(__CLASS__ . '::load');
 	}
 	public static function save() {
-		file_put_contents(static::$cacheFile, json_encode(static::$cache, JSON_FORCE_OBJECT));
+		if(static::$tainted) {
+			if(!is_dir(dirname(static::$cacheFile))) {
+				mkdir(dirname(static::$cacheFile), 0700);
+			}
+			file_put_contents(static::$cacheFile, json_encode(static::$cache, JSON_FORCE_OBJECT));
+		}
 	}
 	public static function load($name) {
 		$file = null;
@@ -232,14 +244,15 @@ class Autoload {
 		$fname = strtolower(implode('/', $parts)) . '.php';
 
 		if(array_key_exists($fname, static::$cache)) {
-			$file = static::$cache[$fname];
+			require_once(static::$cache[$fname]);
+			return;
 		} else {
 			$file = static::oldSearch($fname);
-		}
-
-		if($file != null) {
-			static::$cache[$fname] = $file;
-			require_once($file);
+			if($file != null) {
+				static::$cache[$fname] = $file;
+				static::$tainted = true;
+				require_once($file);
+			}
 		}
 	}
 	// well, this is mildly depressing. I spend a few hours working up an iterator approach

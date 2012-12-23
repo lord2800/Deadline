@@ -25,7 +25,7 @@ END;
 
 $cli = <<<END
 <?php
-echo "Hello, cli";
+require_once 'cli.php';
 __HALT_COMPILER();
 END;
 
@@ -34,9 +34,5 @@ $cliname = uniqid() . '_cli.php';
 $phar[$webname] = $web;
 $phar[$cliname] = $cli;
 
-// TODO use createDefaultStub with a cli interface as well as a web interface, and make the current
-// stub into the web interface
 $phar->setDefaultStub($cliname, $webname);
 echo "Built {$output}/deadline.phar succesfully!\n";
-
-?>
