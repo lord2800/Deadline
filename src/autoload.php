@@ -221,6 +221,7 @@ class Autoload {
 			}
 		}
 		spl_autoload_register(__CLASS__ . '::load');
+		Autosave::register(__CLASS__ . '::save');
 	}
 	public static function save() {
 		if(static::$tainted) {
@@ -286,7 +287,6 @@ class Autoload {
 }
 
 Autoload::init();
-Autosave::register(array('Deadline\Autoload', 'save'));
 
 function on_shutdown() {
 	run_shutdown();
@@ -294,4 +294,4 @@ function on_shutdown() {
 }
 
 set_error_handler(function ($errno, $str, $file, $line, $context) { throw new \ErrorException($str, $errno, 0, $file, $line); });
-register_shutdown_function(__NAMESPACE__.'\on_shutdown');
+register_shutdown_function(__NAMESPACE__ . '\on_shutdown');

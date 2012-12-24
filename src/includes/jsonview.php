@@ -17,7 +17,8 @@ class JsonView implements View {
 	public function hasOutput() { return true; }
 	public function output() {
 		$options = JSON_FORCE_OBJECT | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_TAG;
-		if($this->pretty) $options |= JSON_PRETTY_PRINT;
+		// PHP < 5.4 doesn't have JSON_PRETTY_PRINT :(
+		//if($this->pretty) $options |= JSON_PRETTY_PRINT;
 		return json_encode($this->vars, $options);
 	}
 	public function getTemplate() { return null; }

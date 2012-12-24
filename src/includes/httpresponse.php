@@ -18,7 +18,7 @@ class HttpResponse extends Response {
 		$path = strpos($request->url, $request->path, 6);
 		$base = substr($request->url, 0, $path === false ? strlen($request->url)-1 : $path);
 
-		$this->gzip = in_array('gzip', $request->encoding);
+		$this->gzip = in_array('gzip', $request->encoding) && function_exists('gzencode');
 		$this->modified = null;
 		$this->baseUrl = $base;
 		$this->request = $request;

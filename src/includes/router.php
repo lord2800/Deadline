@@ -8,9 +8,11 @@ class Router {
 	private static $cacheFile = 'deadline://cache/routes.cache';
 
 	private function sortRoutes() {
-		uksort($this->routes, function ($a, $b) {
-			$ameta = $this->meta[$a];
-			$bmeta = $this->meta[$b];
+		// PHP < 5.4 doesn't support $this in a closure
+		$that = $this;
+		uksort($this->routes, function ($a, $b) use($that) {
+			$ameta = $that->meta[$a];
+			$bmeta = $that->meta[$b];
 
 			if($ameta['length'] == $bmeta['length']) {
 				if($ameta['count'] > $bmeta['count']) {

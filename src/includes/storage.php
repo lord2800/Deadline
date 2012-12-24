@@ -18,7 +18,7 @@ class Storage {
 	public function load($file) {
 		$this->store = array();
 		if(file_exists($file)) {
-			$contents = json_decode(file_get_contents($file), false, 512, JSON_BIGINT_AS_STRING);
+			$contents = json_decode(file_get_contents($file), false, 512);
 			if(json_last_error() != JSON_ERROR_NONE) {
 				throw new \Exception('JSON error #' . json_last_error());
 			}

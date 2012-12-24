@@ -2,6 +2,7 @@
 namespace Deadline;
 
 use R;
+use Analog;
 
 ob_start();
 
@@ -70,6 +71,8 @@ function run_shutdown() {
 	// did we have an exception?
 	$e = error_get_last();
 	if($e != null) {
+		// write the error to a log
+		Analog::log(json_encode($e));
 		// are we on a live site?
 		if(Storage::current()->get('live', false)) {
 			// display a hardcoded 'oops' page
