@@ -87,7 +87,8 @@ class Mime {
 				'wmv'     => 'video/x-ms-wmv',
 				'bz2'     => 'application/x-bzip',
 				'tbz'     => 'application/x-bzip-compressed-tar',
-				'tar.bz2' => 'application/x-bzip-compressed-tar'
+				'tar.bz2' => 'application/x-bzip-compressed-tar',
+				'webm'    => 'video/webm',
 			);
 		}
 	}

@@ -10,8 +10,15 @@ class Request extends Container {
 		$this->init();
 	}
 	private function filter($var) {
-		$opts = FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_AMP;
-		return filter_var($var, FILTER_SANITIZE_STRING, $opts);
+		if(is_array($var)) {
+			foreach($var as $key => $value) {
+				$var[$key] = $this->filter($value);
+			}
+			return $var;
+		} else {
+			$opts = FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_ENCODE_HIGH | FILTER_FLAG_ENCODE_AMP;
+			return filter_var($var, FILTER_SANITIZE_STRING, $opts);
+		}
 	}
 	private function qualsort($a, $b) {
 		return $a['quality'] == $b['quality'] ? 0 :

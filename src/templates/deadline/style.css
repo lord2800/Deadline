@@ -2,9 +2,7 @@
 	padding-top: 15px;
 }
 
-a:link, a:visited, a:hover, a:active {
-	
-}
+a:link, a:visited, a:hover, a:active {}
 
 /* header styles */
 
@@ -139,6 +137,31 @@ form fieldset {
 	margin: 0px auto;
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
+	background-color: white;
+}
+
+form.installer {
+	width: 600px;
+	margin: 0px auto;
+}
+
+form.installer fieldset {
+	padding: 12px;
+	margin-bottom: 15px;
+	border-radius: 4px;
+}
+
+form.installer legend {
+	border: 1px solid lightgray;
+	padding-left: 4px;
+	padding-right: 4px;
+	font-variant: inherit;
+	width: auto;
+	border-radius: inherit;
+	background-color: inherit;
+}
+
+form.installer .form-actions {
 	background-color: white;
 }
 

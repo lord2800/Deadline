@@ -27,6 +27,7 @@ class HtmlView implements View {
 		$response->setHeader('content type', 'text/html; charset=' . $this->encoding);
 		$this->phptal->setPostFilter(new PostFilter($response->getBaseUrl(), $this->template));
 	}
+	public function hasOutput() { return true; }
 	public function output() { return $this->phptal->execute(); }
 	public function getTemplate() { return $this->template; }
 	public function setTemplate($file) { $this->phptal->setTemplate($file); }

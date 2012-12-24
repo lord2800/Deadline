@@ -14,6 +14,8 @@ function main() {
 	$router = new Router();
 	$router->load('deadline://routes.json');
 
+	error_reporting($store->get('live', false) ? 0 : -1);
+
 	$request = new Request($_SERVER);
 	$response = new HttpResponse($request);
 	list($handler, $args) = $router->find($request);
@@ -23,17 +25,15 @@ function main() {
 		$handler = new Container(array('controller' => 'StaticFile', 'method' => 'file'));
 	}
 
-	$db = $store->get('database');
+	$db = $store->get('database', (object)array('dsn'=>'sqlite::memory:','user'=>null,'pass'=>null));
 	R::setup($db->dsn, $db->user, $db->pass);
-	R::freeze($store->get('live'));
+	R::freeze($store->get('live', false));
 
-	$security = $store->get('security');
+	$security = $store->get('security', (object)array('algo'=>'Blowfish', 'costFactor'=>7));
 	User::init($security->algo, $security->costFactor);
 
-	if($store->get('live')) {
-		set_exception_handler(function ($e) use($request, $response) {
-			\Error::error500($request, $response);
-		});
+	if($store->get('live', false)) {
+		set_exception_handler(function ($e) { run_shutdown(); });
 	}
 
 	$class = $handler->controller;
@@ -71,7 +71,7 @@ function run_shutdown() {
 	$e = error_get_last();
 	if($e != null) {
 		// are we on a live site?
-		if(Storage::current()->get('live')) {
+		if(Storage::current()->get('live', false)) {
 			// display a hardcoded 'oops' page
 		} else {
 			// display diagnostic page

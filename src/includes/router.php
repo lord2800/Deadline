@@ -56,11 +56,15 @@ class Router {
 	public function load($file) {
 		if(file_exists($file)) {
 			$routes = json_decode(file_get_contents($file));
-			foreach($routes as $route => $handler) {
-				$this->addRoute($route, $handler);
+			if($routes === null) {
+				throw new \UnexpectedValueException('Router JSON file ' . $file . ' is malformed! (error: ' . json_last_error() . ')');
+			} else {
+				foreach($routes as $route => $handler) {
+					$this->addRoute($route, $handler);
+				}
+				$this->sortRoutes();
+				$this->tainted = false;
 			}
-			$this->sortRoutes();
-			$this->tainted = false;
 		}
 		$this->file = $file;
 	}

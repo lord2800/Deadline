@@ -1,0 +1,86 @@
+<tal:block metal:use-macro="page-defaults.tal/short-header-page">
+	<tal:block metal:fill-slot="content">
+		<div class="span8 offset2">
+			<div class="well">
+				<h1>Welcome to Deadline</h1>
+				<p>
+					Setup is simple: just fill in these few fields, and in moments your new site will be ready to go!
+				</p>
+				<form action="" method="POST" class="form-horizontal installer">
+					<fieldset>
+						<legend>Database Settings</legend>
+						<div class="control-group">
+							<label for="dsn" class="control-label">Connection String</label>
+							<div class="controls">
+								<input type="text" id="dsn" name="settings[dsn]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="dbuser" class="control-label">User Name</label>
+							<div class="controls">
+								<input type="text" id="dbuser" name="settings[dbuser]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="dbpass" class="control-label">Password</label>
+							<div class="controls">
+								<input type="password" id="dbpass" name="settings[dbpass]" />
+							</div>
+						</div>
+					</fieldset>
+					<fieldset>
+						<legend>Site Settings</legend>
+						<div class="control-group">
+							<label for="title" class="control-label">Title</label>
+							<div class="controls">
+								<input type="text" id="title" name="settings[title]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="tagline" class="control-label">Tagline</label>
+							<div class="controls">
+								<input type="text" id="tagline" name="settings[tagline]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="header" class="control-label">Header Image (URL)</label>
+							<div class="controls">
+								<input type="url" id="header" name="settings[header]" />
+							</div>
+						</div>
+					</fieldset>
+					<fieldset>
+						<legend>Administrator</legend>
+						<div class="control-group">
+							<label for="user" class="control-label">Login</label>
+							<div class="controls">
+								<input type="text" id="user" name="settings[user]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="displayName" class="control-label">Display Name</label>
+							<div class="controls">
+								<input type="text" id="displayName" name="settings[displayName]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="email" class="control-label">Email</label>
+							<div class="controls">
+								<input type="email" id="email" name="settings[email]" />
+							</div>
+						</div>
+						<div class="control-group">
+							<label for="pass" class="control-label">Password</label>
+							<div class="controls">
+								<input type="password" id="pass" name="settings[pass]" />
+							</div>
+						</div>
+					</fieldset>
+					<div class="form-actions">
+						<button class="btn btn-primary">Make it so</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</tal:block>
+</tal:block>

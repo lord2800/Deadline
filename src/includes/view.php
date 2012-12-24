@@ -5,6 +5,7 @@
 interface View {
 	public function __construct($encoding, $reparse);
 	public function prepare(Deadline\Response $response);
+	public function hasOutput();
 	public function output();
 	public function getTemplate();
 	public function setTemplate($template);

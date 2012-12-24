@@ -21,6 +21,7 @@ class PartialHtmlView implements View {
 		$this->template = $template;
 	}
 	public function prepare(Deadline\Response $response) {}
+	public function hasOutput() { return true; }
 	public function output() { return $this->phptal->execute(); }
 	public function getTemplate() { return $this->template; }
 	public function setTemplate($file) { $this->phptal->setTemplate($file); }

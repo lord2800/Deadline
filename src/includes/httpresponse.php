@@ -15,7 +15,8 @@ class HttpResponse extends Response {
 		}
 
 		static::$instance = $this;
-		$base = substr($request->url, 0, strpos($request->url, $request->path, 6));
+		$path = strpos($request->url, $request->path, 6);
+		$base = substr($request->url, 0, $path === false ? strlen($request->url)-1 : $path);
 
 		$this->gzip = in_array('gzip', $request->encoding);
 		$this->modified = null;
@@ -72,30 +73,39 @@ class HttpResponse extends Response {
 	public function output(\View $view) {
 		if($this->cached) {
 			$this->setHeader('status', '304 Not Modified');
+			$this->sendHeaders();
 		} else {
 			$hash = md5($this->request->requester['addr']);
 			$file = 'deadline://cache/' . 'page_' . $hash . '.html';
 
-			$content = $view->output();
-			if($this->gzip) {
-				file_put_contents($file, gzencode($content, 9));
-				$this->setHeader('content encoding', 'gzip');
+			if(!$view->hasOutput()) {
+				// the view will handle the rest of its' own headers
+				$this->sendHeaders();
+				$view->output();
 			} else {
-				file_put_contents($file, $content);
-			}
-			$this->setHeader('content length', strlen($content));
-			unset($content);
+				// the view won't handle headers, we need to buffer the output
+				// and send the headers at the end
+				$content = $view->output();
+				if($this->gzip) {
+					file_put_contents($file, gzencode($content, 9));
+					$this->setHeader('content encoding', 'gzip');
+				} else {
+					file_put_contents($file, $content);
+				}
+				$this->setHeader('content length', strlen($content));
+				unset($content);
 
-			$this->setHeader('content md5', base64_encode(md5_file($file)));
-			if($this->etag != null) {
-				$this->setHeader('etag', '"' . $this->etag . '"');
-			}
-			$this->setHeader('status', '200 OK');
-		}
+				$this->setHeader('content md5', base64_encode(md5_file($file)));
+				if($this->etag != null) {
+					$this->setHeader('etag', '"' . $this->etag . '"');
+				}
+				$this->setHeader('status', '200 OK');
 
-		$this->sendHeaders();
-		if(!$this->cached) {
-			readfile($file);
+				$this->sendHeaders();
+				if(file_exists($file)) {
+					readfile($file);
+				}
+			}
 		}
 	}
 
@@ -135,7 +145,7 @@ class HttpResponse extends Response {
 			$this->sendHeader($name, $value);
 		}
 	}
-	public function setHeader($name, $value, $replace = true) {
+	public function setHeader($name, $value, $replace = false) {
 		if($replace || !array_key_exists($name, $this->headers)) {
 			$this->headers[$name] = $value;
 		}

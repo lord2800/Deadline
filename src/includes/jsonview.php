@@ -14,6 +14,7 @@ class JsonView implements View {
 	public function prepare(Deadline\Response $response) {
 		$response->setHeader('content type', 'application/json; charset=' . $this->encoding);
 	}
+	public function hasOutput() { return true; }
 	public function output() {
 		$options = JSON_FORCE_OBJECT | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_TAG;
 		if($this->pretty) $options |= JSON_PRETTY_PRINT;

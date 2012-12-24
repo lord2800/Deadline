@@ -40,7 +40,8 @@ class FileView implements View {
 					$len = $end - $start;
 					$response->setHeader('status', '206 Partial Content');
 					$response->setHeader('content range', 'bytes ' . $start . '-' . $end . '/' . $flen);
-					$response->range = array('start' => $start, 'end' => $end, 'length' => $len);
+					$response->setHeader('content length', $len, true);
+					$this->range = array('start' => $start, 'end' => $end, 'length' => $len);
 				}
 			}
 		}
@@ -49,17 +50,19 @@ class FileView implements View {
 		$start = $this->range['start'];
 		$length = $this->range['length'];
 		$count = 0;
-		$content = '';
+
+		while(ob_get_level()) ob_end_clean();
 
 		$file = fopen($this->file, 'rb');
 		fseek($file, $start);
 		while(!feof($file) && $count < $length) {
-			$content .= fread($file, $length);
+			print(fread($file, 8192));
+			flush();
 			$count += 8192;
 		}
 		fclose($file);
-		return $content;
 	}
+	public function hasOutput() { return false; }
 	public function getTemplate() { return $this->file; }
     public function setTemplate($template) { $this->setFile($template); }
 	public function setFile($file, $download = false) {

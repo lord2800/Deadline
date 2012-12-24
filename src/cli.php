@@ -32,12 +32,40 @@ if(isset($options['skelgen'])) {
 	}
 	Deadline\User::register($options['user'], $options['user'], $options['email'], $options['pass']);
 } else if(isset($options['install'])) {
-	// run the installer script
+	$dsn = prompt('Enter your database connection string');
+	$dbuser = prompt('Enter your database username');
+	$dbpass = prompt('Enter your database password');
+	$user = prompt('Enter your admin username');
+	$display = prompt('Enter the display name for the admin');
+	$email = prompt('Enter the email for the admin');
+	$pass = prompt('Enter the password for the admin');
+
+	$settings = array(
+		'dsn' => $dsn,
+		'dbuser' => $dbuser,
+		'dbpass' => $dbpass,
+		'user' => $user,
+		'displayName' => $display,
+		'email' => $email,
+		'pass' => $pass,
+	);
+	var_dump($settings); die();
+	Install::cliInstall($settings);
+	fwrite(STDOUT, 'Done! You are now installed and ready to go.');
 } else if(isset($options['help']) || isset($options['h'])) {
 	show_help($argv[0]);
 } else {
 	fwrite(STDERR, 'Unrecognized option, see below for options' . PHP_EOL);
 	show_help($argv[0]);
+}
+
+function prompt($prompt) {
+	if(function_exists('readline')) {
+		return readline($prompt . ": ");
+	} else {
+		fwrite(STDOUT, $prompt . ": ");
+		return trim(fgets(STDIN));
+	}
 }
 
 function show_help($name) {

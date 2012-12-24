@@ -1,11 +1,11 @@
 {
-	"/home": {
-		"controller": "home",
-		"method": "index"
+	"/index": {
+		"controller": "Home",
+		"method": "start"
 	},
-	"/home/test/:id": {
-		"controller": "home",
-		"method": "test"
+	"/install": {
+		"controller": "Install",
+		"method": "webInstall"
 	},
 	"/admin": {
 		"controller": "Admin",
