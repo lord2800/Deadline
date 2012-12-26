@@ -16,7 +16,8 @@ $options = getopt('h', array(
 	'email:',
 	'skelgen:',
 	'name:',
-	'install'
+	'install',
+	'template-lint:'
 ));
 
 if(isset($options['skelgen'])) {
@@ -52,6 +53,9 @@ if(isset($options['skelgen'])) {
 	var_dump($settings); die();
 	Install::cliInstall($settings);
 	fwrite(STDOUT, 'Done! You are now installed and ready to go.');
+} else if(isset($options['template-lint'])) {
+	// TODO implement template lint
+}
 } else if(isset($options['help']) || isset($options['h'])) {
 	show_help($argv[0]);
 } else {
