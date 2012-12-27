@@ -61,6 +61,7 @@ class Router {
 			if($routes === null) {
 				throw new \UnexpectedValueException('Router JSON file ' . $file . ' is malformed! (error: ' . json_last_error() . ')');
 			} else {
+				// TODO support hardcoding arguments to a route, redirection
 				foreach($routes as $route => $handler) {
 					$this->addRoute($route, $handler);
 				}
@@ -121,6 +122,9 @@ class Router {
 	public function find(Request $request) {
 		// pick apart the url, find the route from that
 		$pathinfo = pathinfo($request->path);
+		if(!isset($pathinfo['dirname']) || $pathinfo['dirname'] == '\\') {
+			$pathinfo['dirname'] = '';
+		}
 		$path = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
 		$urlparts = array_values(array_filter(explode('/', $path)));
 		foreach($this->routes as $route => $handler) {

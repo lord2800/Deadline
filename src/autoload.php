@@ -221,9 +221,9 @@ class Autoload {
 			}
 		}
 		spl_autoload_register(__CLASS__ . '::load');
-		Autosave::register(__CLASS__ . '::save');
+		Autosave::register(__CLASS__ . '::autosave');
 	}
-	public static function save() {
+	public static function autosave() {
 		if(static::$tainted) {
 			if(!is_dir(dirname(static::$cacheFile))) {
 				mkdir(dirname(static::$cacheFile), 0700);
@@ -290,7 +290,7 @@ Autoload::init();
 
 function on_shutdown() {
 	run_shutdown();
-	Autosave::save();
+	//Autosave::save();
 }
 
 set_error_handler(function ($errno, $str, $file, $line, $context) { throw new \ErrorException($str, $errno, 0, $file, $line); });

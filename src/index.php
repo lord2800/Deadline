@@ -4,6 +4,10 @@ namespace Deadline;
 use R;
 use Analog;
 
+register_shutdown_function(function ($start) {
+	echo '<!-- page built in ' . (microtime(true) - $start) . ' microseconds, used ' . memory_get_peak_usage() . ' memory -->';
+}, microtime(true));
+date_default_timezone_set('UTC');
 ob_start();
 
 require_once('fix-realpath.php');

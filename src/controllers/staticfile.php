@@ -26,14 +26,17 @@ class StaticFile {
 			$view->setCode(404);
 			return $view;
 		}
-		if(file_exists($path)) {
+		if(file_exists($path) && !is_dir($path)) {
 			$response->setModifiedTime(filemtime($path));
 			$response->setEtag(md5_file($path));
 			$response->setCacheControl('public', 315360000);
 			$view = $response->getView('file');
 			$view->setFile($path);
 			return $view;
+		} else {
+			$view = $response->getView('error');
+			$view->setCode(404);
+			return $view;
 		}
-		return null;
 	}
 }

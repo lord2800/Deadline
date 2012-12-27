@@ -17,7 +17,8 @@ $options = getopt('h', array(
 	'skelgen:',
 	'name:',
 	'install',
-	'template-lint:'
+	'template-lint:',
+	'ext:'
 ));
 
 if(isset($options['skelgen'])) {
@@ -54,8 +55,11 @@ if(isset($options['skelgen'])) {
 	Install::cliInstall($settings);
 	fwrite(STDOUT, 'Done! You are now installed and ready to go.');
 } else if(isset($options['template-lint'])) {
-	// TODO implement template lint
-}
+	$lint = new PHPTAL_Lint();
+	$lint->skipUnknownModifiers(true);
+	$lint->scan('deadline://templates/' . $options['template-lint']);
+	$lint->displayErrors();
+	echo PHP_EOL;
 } else if(isset($options['help']) || isset($options['h'])) {
 	show_help($argv[0]);
 } else {
@@ -100,4 +104,114 @@ Options:
 
 END;
 	fwrite(STDOUT, $help);
+}
+
+class PHPTAL_Lint
+{
+    private $ignore_pattern = '/^\.|\.(?i:php|inc|jpe?g|gif|png|mo|po|txt|orig|rej|xsl|xsd|sh|in|ini|conf|css|js|py|pdf|swf|csv|ico|jar|htc)$|^Makefile|^[A-Z]+$/';
+    private $accept_pattern = '/\.(?:xml|[px]?html|zpt|phptal|tal|tpl)$/i';
+    private $skipUnknownModifiers = false;
+
+    public $errors = array();
+    public $warnings = array();
+    public $ignored = array();
+    public $skipped = 0, $skipped_filenames = array();
+    public $checked = 0;
+
+    function skipUnknownModifiers($bool)
+    {
+        $this->skipUnknownModifiers = $bool;
+    }
+
+    function acceptExtensions(array $ext) {
+        $this->accept_pattern = '/\.(?:' . implode('|', $ext) . ')$/i';
+    }
+
+    protected function reportProgress($symbol)
+    {
+        echo $symbol;
+    }
+
+    function scan($path)
+    {
+        foreach (new DirectoryIterator($path) as $entry) {
+            $filename = $entry->getFilename();
+
+            if ($filename === '.' || $filename === '..') {
+                continue;
+            }
+
+            if (preg_match($this->ignore_pattern, $filename)) {
+                $this->skipped++;
+                continue;
+            }
+
+            if ($entry->isDir()) {
+                $this->reportProgress('.');
+                $this->scan($path . DIRECTORY_SEPARATOR . $filename);
+                continue;
+            }
+
+            if (! preg_match($this->accept_pattern, $filename)) {
+                $this->skipped++;
+                $this->skipped_filenames[$filename] = true;
+                continue;
+            }
+
+            $result = $this->testFile($path . DIRECTORY_SEPARATOR . $filename);
+
+            if (self::TEST_OK == $result) {
+                $this->reportProgress('.');
+            } else if (self::TEST_ERROR == $result) {
+                $this->reportProgress('E');
+            } else if (self::TEST_SKIPPED == $result) {
+                $this->reportProgress('S');
+            }
+        }
+    }
+
+    const TEST_OK = 1;
+    const TEST_ERROR = 2;
+    const TEST_SKIPPED = 3;
+
+    /**
+     * @return int - one of TEST_* constants
+     */
+    function testFile($fullpath)
+    {
+        try {
+            $this->checked ++;
+            $phptal = new PHPTAL($fullpath);
+            $phptal->setForceReparse(true);
+            $phptal->prepare();
+            return self::TEST_OK;
+        }
+        catch(PHPTAL_UnknownModifierException $e) {
+            if ($this->skipUnknownModifiers && is_callable(array($e, 'getModifierName'))) {
+                $this->warnings[] = array(dirname($fullpath), basename($fullpath), "Unknown expression modifier: ".$e->getModifierName()." (use -i to include your custom modifier functions)", $e->getLine());
+                return self::TEST_SKIPPED;
+            }
+            $log_exception = $e;
+        }
+        catch(Exception $e) {
+            $log_exception = $e;
+        }
+
+        // Takes exception from either of the two catch blocks above
+        $this->errors[] = array(dirname($fullpath) , basename($fullpath) , $log_exception->getMessage() , $log_exception->getLine());
+        return self::TEST_ERROR;
+    }
+
+    function displayErrors()
+    {
+        $last_dir = '.';
+        foreach ($this->errors as $errinfo) {
+            if ($errinfo[0] !== $last_dir) {
+                echo "In ", $errinfo[0], ":\n";
+                $last_dir = $errinfo[0];
+            }
+            echo $errinfo[1], ": ", $errinfo[2], ' (line ', $errinfo[3], ')';
+            echo "\n";
+        }
+    }
 }
