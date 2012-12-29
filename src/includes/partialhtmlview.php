@@ -1,6 +1,9 @@
 <?php
+// AVOID a namespace here due to class loading
+//namespace Deadline;
 
 use Deadline\Storage;
+use Deadline\PathWrapper;
 
 class PartialHtmlView implements View {
 	private $vars = array(), $phptal, $encoding, $template;
@@ -10,8 +13,9 @@ class PartialHtmlView implements View {
 		$this->phptal->setOutputMode(\PHPTAL::HTML5)
 					 ->setEncoding($encoding)
 					 ->setForceReparse($reparse)
-					 ->setPhpCodeDestination('deadline://cache')
-					 ->setTemplateRepository('deadline://templates/' . $template)
+					 // HACK: resolve these paths beforehand, because realpath() doesn't work with stream wrappers
+					 ->setPhpCodeDestination(PathWrapper::resolve('deadline://cache'))
+					 ->setTemplateRepository(PathWrapper::resolve('deadline://templates/') . $template)
 					 ->addPreFilter(new PHPTAL_PreFilter_StripComments())
 					 ->addPreFilter(new PHPTAL_PreFilter_Normalize())
 					 ->addPreFilter(new PHPTAL_PreFilter_Compress())

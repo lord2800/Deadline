@@ -3,6 +3,7 @@
 //namespace Deadline;
 
 use Deadline\Storage;
+use Deadline\PathWrapper;
 
 class HtmlView implements View {
 	private $vars = array(), $encoding, $phptal, $template;
@@ -12,8 +13,9 @@ class HtmlView implements View {
 		$this->phptal->setOutputMode(tal::HTML5)
 			 ->setEncoding($encoding)
 			 ->setForceReparse($reparse)
-			 ->setPhpCodeDestination('deadline://cache')
-			 ->setTemplateRepository('deadline://templates/' . $template)
+			 // HACK: resolve these paths beforehand, because realpath() doesn't work with stream wrappers
+			 ->setPhpCodeDestination(PathWrapper::resolve('deadline://cache'))
+			 ->setTemplateRepository(PathWrapper::resolve('deadline://templates/') . $template)
 			 ->addPreFilter(new PHPTAL_PreFilter_StripComments())
 			 ->addPreFilter(new PHPTAL_PreFilter_Normalize())
 			 ->addPreFilter(new PHPTAL_PreFilter_Compress())

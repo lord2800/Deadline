@@ -75,6 +75,7 @@ class HttpResponse extends Response {
 			$this->setHeader('status', '304 Not Modified');
 			$this->sendHeaders();
 		} else {
+			// TODO use php://input instead to avoid making a file
 			$hash = md5($this->request->requester['addr']);
 			$file = 'deadline://cache/' . 'page_' . $hash . '.html';
 

@@ -9,10 +9,10 @@ class Router {
 
 	private function sortRoutes() {
 		// PHP < 5.4 doesn't support $this in a closure
-		$that = $this;
-		uksort($this->routes, function ($a, $b) use($that) {
-			$ameta = $that->meta[$a];
-			$bmeta = $that->meta[$b];
+		$meta = $this->meta;
+		uksort($this->routes, function ($a, $b) use($meta) {
+			$ameta = $meta[$a];
+			$bmeta = $meta[$b];
 
 			if($ameta['length'] == $bmeta['length']) {
 				if($ameta['count'] > $bmeta['count']) {
@@ -124,6 +124,9 @@ class Router {
 		$pathinfo = pathinfo($request->path);
 		if(!isset($pathinfo['dirname']) || $pathinfo['dirname'] == '\\') {
 			$pathinfo['dirname'] = '';
+		}
+		if(!isset($pathinfo['filename']) || $pathinfo['filename'] == '') {
+			$pathinfo['filename'] = 'index';
 		}
 		$path = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
 		$urlparts = array_values(array_filter(explode('/', $path)));

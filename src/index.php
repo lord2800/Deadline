@@ -10,7 +10,6 @@ register_shutdown_function(function ($start) {
 date_default_timezone_set('UTC');
 ob_start();
 
-require_once('fix-realpath.php');
 require_once('autoload.php');
 
 function main() {
