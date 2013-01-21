@@ -70,13 +70,15 @@ class PostFilter implements PHPTAL_Filter {
 	}
 	public function filter($code) {
 		// replace our custom uri namespaces with the real deal
+		$base = $this->base;
+		$template = $this->template;
 		$code = preg_replace_callback($this->templateRegex,
-			function ($m) {
-				return $this->base . '/templates/' . $this->template . '/' . $m[1];
+			function ($m) use($base, $template) {
+				return $base . '/templates/' . $template . '/' . $m[1];
 			},
 			preg_replace_callback($this->linkRegex,
-				function ($m) {
-					return $this->base . '/' . $m[1];
+				function ($m) use($base) {
+					return $base . '/' . $m[1];
 				}, $code));
 		return $code;
 	}
