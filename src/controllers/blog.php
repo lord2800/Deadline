@@ -1,18 +1,20 @@
 <?php
 
+use Deadline\App;
+
 class Blog {
 	private static $blogBean = 'blogpost';
 	private static $commentBean = 'blogcomment';
 	private static $countPerPage = 10;
 
-	public function index($request, $args, $response) {
+	public function index($args) {
 		$page = array_key_exists('page', $args) ? $args['page'] : 1;
 		$posts = R::find(static::$blogBean, 'mode=? ORDER BY published DESC LIMIT ? OFFSET ?',
 			array('published', static::$countPerPage, $page-1)
 		);
 		R::preload($posts, array('user'));
 
-		$view = $response->getView();
+		$view = App::response()->getView();
 		$view->template = 'blog/index.tal';
 		$view->title = 'Recent entries';
 		$view->posts = $posts;
@@ -20,14 +22,15 @@ class Blog {
 		$view->prevPage = $page-1;
 		$view->pageCount = ceil(R::count(static::$blogBean) / static::$countPerPage);
 
-		$response->setCacheControl(900);
+		App::response()->setCacheControl(900);
 		return $view;
 	}
 
-	public function entry($request, $args, $response) {
+	public function entry($args, $response) {
 		$entry = R::load(static::$blogBean, (int)$args['id']);
 		if($entry->isEmpty() || $entry->mode != 'published') $entry = null;
 
+		$response = App::response();
 		$view = $response->getView();
 		$view->template = 'blog/entry.tal';
 		$view->post = $entry;
@@ -41,7 +44,10 @@ class Blog {
 		return $view;
 	}
 
-	public function edit($request, $args, $response) {
+	public function edit($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$id = $args['id'];
 			$view = $response->getView();
@@ -71,7 +77,10 @@ class Blog {
 		}
 	}
 
-	public function publish($request, $args, $response) {
+	public function publish($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$view = $response->getView();
 			$view->template = 'confirm.tal';
@@ -101,7 +110,10 @@ class Blog {
 		}
 	}
 
-	public function unpublish($request, $args, $response) {
+	public function unpublish($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$view = $response->getView();
 			$view->template = 'confirm.tal';
@@ -131,7 +143,10 @@ class Blog {
 		}
 	}
 
-	public function delete($request, $args, $response) {
+	public function delete($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$view = $response->getView();
 			$view->template = 'confirm.tal';

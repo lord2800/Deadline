@@ -6,13 +6,7 @@ class Storage {
 	private $tainted = false;
 	private $file = '';
 
-	private static $instance;
-	public static function current() { return static::$instance; }
-
-	public function __construct() {
-		static::$instance = $this;
-		Autosave::register(array(&$this, 'autosave'));
-	}
+	public function __construct() { Autosave::register(array(&$this, 'autosave')); }
 	public function autosave() { if($this->tainted && $this->file != '') { $this->save($this->file); } }
 
 	public function load($file) {
@@ -41,7 +35,5 @@ class Storage {
 		$this->store[$name] = $value;
 		$this->tainted = true;
 	}
-	public function clear() {
-		return count($this->store) == 0;
-	}
+	public function clear() { return count($this->store) == 0; }
 }

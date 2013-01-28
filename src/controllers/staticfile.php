@@ -1,13 +1,13 @@
 <?php
 
+use Deadline\App;
+
 class StaticFile {
 	private $disallow;
 	public function __construct() {
+		$disallow = array();
 		if(file_exists('deadline://disallow.json')) {
 			$disallow = json_decode(file_get_contents('deadline://disallow.json'), true);
-			if($disallow === null) $disallow = array();
-		} else {
-			$disallow = array();
 		}
 		$this->disallow = array_merge(array(
 			// default types to not allow access to
@@ -17,10 +17,11 @@ class StaticFile {
 			'cache'
 		), $disallow);
 	}
-	public function file($request, $args, $response) {
+	public function file($args) {
 		// $request->path already contains a leading /
-		$path = 'deadline:/' . $request->path;
+		$path = 'deadline:/' . App::request()->path;
 		$ext = pathinfo($path, PATHINFO_EXTENSION);
+		$response = App::response();
 		if(in_array($ext, $this->disallow)) {
 			$view = $response->getView('error');
 			$view->setCode(404);

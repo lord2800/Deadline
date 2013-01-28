@@ -22,7 +22,7 @@ class FileView implements View {
 			$response->setHeader('accept ranges', 'bytes');
 			$response->setHeader('content range', 'bytes ' . '0-' . ($flen - 1) . '/' . $flen);
 
-			$range = $response->getRequest()->getHeader('Range');
+			$range = App::request()->getHeader('Range');
 			if($range != null) {
 				// TODO support multi-range requests
 				// how do they actually work? need to research this more
@@ -46,23 +46,15 @@ class FileView implements View {
 			}
 		}
 	}
-    public function output() {
+    public function output($fp) {
 		$start = $this->range['start'];
 		$length = $this->range['length'];
 		$count = 0;
 
-		while(ob_get_level()) ob_end_clean();
-
 		$file = fopen($this->file, 'rb');
-		fseek($file, $start);
-		while(!feof($file) && $count < $length) {
-			print(fread($file, 8192));
-			flush();
-			$count += 8192;
-		}
+		stream_copy_to_stream($file, $fp, $length, $start);
 		fclose($file);
 	}
-	public function hasOutput() { return false; }
 	public function getTemplate() { return $this->file; }
     public function setTemplate($template) { $this->setFile($template); }
 	public function setFile($file, $download = false) {

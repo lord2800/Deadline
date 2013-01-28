@@ -8,7 +8,7 @@ use Deadline\PathWrapper;
 class PartialHtmlView implements View {
 	private $vars = array(), $phptal, $encoding, $template;
 	public function __construct($encoding = 'UTF-8', $reparse = false) {
-		$template = Storage::current()->get('template', 'deadline');
+		$template = App::store()->get('template', 'deadline');
 		$this->phptal = new \PHPTAL();
 		$this->phptal->setOutputMode(\PHPTAL::HTML5)
 					 ->setEncoding($encoding)

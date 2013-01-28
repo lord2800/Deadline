@@ -14,12 +14,9 @@ class JsonView implements View {
 	public function prepare(Deadline\Response $response) {
 		$response->setHeader('content type', 'application/json; charset=' . $this->encoding);
 	}
-	public function hasOutput() { return true; }
-	public function output() {
+	public function output($fp) {
 		$options = JSON_FORCE_OBJECT | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_TAG;
-		// PHP < 5.4 doesn't have JSON_PRETTY_PRINT :(
-		//if($this->pretty) $options |= JSON_PRETTY_PRINT;
-		return json_encode($this->vars, $options);
+		fwrite($fp, json_encode(array('data' => $this->vars), $options));
 	}
 	public function getTemplate() { return null; }
 	public function setTemplate($template) {}

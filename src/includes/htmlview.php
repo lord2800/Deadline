@@ -2,13 +2,14 @@
 // AVOID a namespace here due to class loading
 //namespace Deadline;
 
+use Deadline\App;
 use Deadline\Storage;
 use Deadline\PathWrapper;
 
 class HtmlView implements View {
 	private $vars = array(), $encoding, $phptal, $template;
 	public function __construct($encoding = 'UTF-8', $reparse = false) {
-		$template = Storage::current()->get('template', 'deadline');
+		$template = App::store()->get('template', 'deadline');
 		$this->phptal = new tal();
 		$this->phptal->setOutputMode(tal::HTML5)
 			 ->setEncoding($encoding)
@@ -29,8 +30,7 @@ class HtmlView implements View {
 		$response->setHeader('content type', 'text/html; charset=' . $this->encoding);
 		$this->phptal->setPostFilter(new PostFilter($response->getBaseUrl(), $this->template));
 	}
-	public function hasOutput() { return true; }
-	public function output() { return $this->phptal->execute(); }
+	public function output($fp) { fwrite($fp, $this->phptal->execute()); }
 	public function getTemplate() { return $this->template; }
 	public function setTemplate($file) { $this->phptal->setTemplate($file); }
 	public function __set($name, $value) {

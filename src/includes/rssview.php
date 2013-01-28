@@ -8,8 +8,7 @@ class RssView implements View {
 	public function prepare(Deadline\Response $response) {
 		$response->setHeader('content type', 'application/xml+rss; charset=' . $this->encoding);
 	}
-	public function hasOutput() { return true; }
-	public function output() {}
+	public function output($fp) {}
 	public function getTemplate() { return null; }
 	public function setTemplate($template) {}
 	public function __set($name, $value) { $this->vars[$name] = $value; }

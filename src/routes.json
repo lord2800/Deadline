@@ -11,10 +11,6 @@
 		"controller": "Admin",
 		"method": "index"
 	},
-	"/admin/page/:?controller/:?method": {
-		"controller": "Admin",
-		"method": "page"
-	},
 	"/user/signin": {
 		"controller": "Profile",
 		"method": "signin"

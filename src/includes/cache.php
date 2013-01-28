@@ -5,8 +5,8 @@ class Cache {
 	private $server, $type;
 
 	public function __construct(Storage $store) {
-		$type = $store->get('cache-type');
-		$server = new $type($store->get('cache-server'));
+		$type = $store->get('cache-type', 'apc');
+		$server = new $type($store->get('cache-server', 'localhost'));
 	}
 	public function add($key, $value, $expires = 0) {}
 	// find returns null, get throws an exception

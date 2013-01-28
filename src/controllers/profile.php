@@ -1,9 +1,13 @@
 <?php
 
 use Deadline\User;
+use Deadline\App;
 
 class Profile {
-	public function signin($request, $args, $response) {
+	public function signin($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			if(User::current() != null) {
 				$response->redirect('/home');
@@ -28,7 +32,10 @@ class Profile {
 			}
 		}
 	}
-	public function signout($request, $args, $response) {
+	public function signout($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$view = $response->getView();
 			$view->template = 'confirm.tal';
@@ -40,7 +47,10 @@ class Profile {
 			$response->redirect('/home');
 		}
 	}
-	public function signup($request, $args, $response) {
+	public function signup($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$view = $response->getView();
 			$view->template = 'profile/signup.tal';
@@ -52,7 +62,10 @@ class Profile {
 			$response->redirect('/user/' . $user);
 		}
 	}
-	public function edit($request, $args, $response) {
+	public function edit($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$user = User::find($args['profile'], true);
 			$view = $response->getView();
@@ -63,7 +76,9 @@ class Profile {
 		} else if($request->verb == 'POST') {
 		}
 	}
-	public function role($request, $args, $response) {
+	public function role($args) {
+		$response = App::response();
+
 		$view = $response->getView();
 		$view->template = 'profile/roles.tal';
 		$view->title = 'Users in ' . $args['role'];

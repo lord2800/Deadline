@@ -2,9 +2,16 @@
 	"live": false,
 	"template": "deadline",
 	"database": {
-		"dsn": "sqlite:///var/www/deadlinecms.com/deadline.db3",
-		"user": null,
-		"pass": null
+		"live": {
+			"dsn": "sqlite:///var/www/deadlinecms.com/deadline.db3",
+			"user": null,
+			"pass": null
+		},
+		"production": {
+			"dsn": "sqlite:///var/www/deadlinecms.com/deadline.db3",
+			"user": null,
+			"pass": null
+		}
 	},
 	"security": {
 		"algo": "Blowfish",

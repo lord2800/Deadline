@@ -2,13 +2,14 @@
 
 use FilesystemIterator as FS;
 use Deadline\Storage;
+use Deadline\App;
 
 class Video {
-	public function videos($request, $args, $response) {
-		$path = Storage::current()->get('videoPath');
+	public function videos($args) {
+		$path = App::store()->get('videoPath');
 		$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FS::NEW_CURRENT_AND_KEY | FS::SKIP_DOTS));
 
-		$view = $response->getView();
+		$view = App::response()->getView();
 		$view->template = 'video/list.tal';
 
 		$videos = array();
@@ -23,9 +24,9 @@ class Video {
 		$view->videos = $videos;
 		return $view;
 	}
-	public function show($request, $args, $response) {
-		$file = $request->input['get']['f'];
-		$path = Storage::current()->get('videoPath');
+	public function show($args) {
+		$file = App::request()->input['get']['f'];
+		$path = App::store()->get('videoPath');
 		$path = $path . '/' . rawurldecode($file);
 		if(file_exists($path)) {
 			$f = new \finfo();
@@ -35,19 +36,19 @@ class Video {
 				'type' => substr($mime, strpos($mime, '/')+1)
 			);
 
-			$view = $response->getView();
+			$view = App::response()->getView();
 			$view->template = 'video/view.tal';
 			$view->videos = array($video);
 			return $view;
 		}
 	}
-	public function file($request, $args, $response) {
-		$file = $request->input['get']['f'];
-		$path = Storage::current()->get('videoPath');
+	public function file($args) {
+		$file = App::request()->input['get']['f'];
+		$path = App::store()->get('videoPath');
 		$view = new FileView();
 		$view->setFile($path . '/' . rawurldecode($file), true);
-		$response->setEtag(md5_file($path . '/' . rawurldecode($file)));
-		$response->setCacheControl('public', 315360000);
+		App::response()->setEtag(md5_file($path . '/' . rawurldecode($file)));
+		App::response()->setCacheControl('public', 315360000);
 		return $view;
 	}
 }

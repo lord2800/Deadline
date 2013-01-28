@@ -1,6 +1,7 @@
 <?php
 
 use FilesystemIterator as FS;
+use Deadline\App;
 use Deadline\User;
 
 class Admin {
@@ -36,7 +37,7 @@ class Admin {
 		}
 		return $menus;
 	}
-	private function getWidgets($response) {
+	private function getWidgets() {
 		$widgets = array();
 		// TODO: cache these results for speed
 		foreach($this->findControllers() as $controller) {
@@ -51,29 +52,17 @@ class Admin {
 		return $widgets;
 	}
 
-	public function index($request, $args, $response) {
-		$view = $response->getView();
+	public function index($args) {
+		$view = App::response()->getView();
 		$view->template = 'admin/index.tal';
-		$view->widgets = $this->getWidgets($response);
+		$view->widgets = $this->getWidgets();
 		return $view;
 	}
 
-	public function page($request, $args, $response) {
-		$controller = ucfirst(strtolower($args['controller']));
-		$method = $args['method'];
-		$instance = new $controller();
-		$view = $response->getView();
-		$fragment = $response->getPartial();
-		$instance->$method($request, new Deadline\Container(), $fragment);
-		$view->template = 'admin/page.tal';
-		$view->content = $fragment->output();
-		return $view;
-	}
-
-	public function setup($response) {
+	public function setup() {
 		User::current()->requiresRole('administrator');
 	}
-	public function finish($response, $view) {
+	public function finish($view) {
 		$view->controllers = $this->getMenus();
 		$view->hideSignonBox = true;
 	}

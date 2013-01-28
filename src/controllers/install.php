@@ -3,6 +3,7 @@
 require_once('autoload.php');
 
 use Deadline\Storage;
+use Deadline\App;
 use Deadline\User;
 
 class Install {
@@ -21,7 +22,10 @@ class Install {
 		User::register($name, $display, $email, $pass);
 	}
 
-	public function webInstall($request, $args, $response) {
+	public function webInstall($args) {
+		$request = App::request();
+		$response = App::response();
+
 		if($request->verb == 'GET') {
 			$view = $response->getView();
 			$view->template = 'install.tal';

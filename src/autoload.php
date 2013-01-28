@@ -289,7 +289,6 @@ class Autoload {
 Autoload::init();
 
 function on_shutdown() {
-	run_shutdown();
 	//Autosave::save();
 }
 

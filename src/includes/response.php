@@ -7,7 +7,7 @@ abstract class Response {
 	public function getRequest() {}
 	public function getView($type = null) {}
 	public function getFragment($encoding = 'UTF-8') {}
-	public function prepare(Request $request, \View $view = null) {}
+	public function prepare(\View $view = null) {}
 	public function output(\View $view) {}
 	public function redirect($url) {}
 	protected function sendHeader($name, $value) {}

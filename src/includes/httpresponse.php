@@ -1,13 +1,14 @@
 <?php
 namespace Deadline;
 
+use Analog;
+
 class HttpResponse extends Response {
-	private $gzip, $cached = false, $baseUrl, $request;
+	private $gzip, $cached = false, $baseUrl;
 	private $modified, $cacheControl = null, $etag, $p3p,
 			$lang = 'en', $headers = array(), $range = array();
 
 	private static $instance;
-	public static function current() { return static::$instance; }
 
 	public function __construct(Request $request) {
 		if(static::$instance != null) {
@@ -21,15 +22,14 @@ class HttpResponse extends Response {
 		$this->gzip = in_array('gzip', $request->encoding) && function_exists('gzencode');
 		$this->modified = null;
 		$this->baseUrl = $base;
-		$this->request = $request;
 		$this->setCacheControl('no-cache');
 	}
 
 	public function getBaseUrl() { return $this->baseUrl; }
-	public function getRequest() { return $this->request; }
 	public function getView($type = null) {
+		$request = App::request();
 		if($type == null) {
-			$ext = pathinfo($this->getRequest()->path, PATHINFO_EXTENSION);
+			$ext = pathinfo($request->path, PATHINFO_EXTENSION);
 			if($ext == '') {
 				$ext = 'html';
 			}
@@ -38,19 +38,19 @@ class HttpResponse extends Response {
 			$class = ucwords($type) . 'View';
 		}
 
-		$store = Storage::current();
-		$view = new $class($this->getRequest()->charset[0], !$store->get('live'));
+		$view = new $class($request->charset[0], App::live());
 		$view->lang = $this->lang;
-		$view->siteTitle = $store->get('siteTitle');
-		$view->siteTagline = $store->get('siteTagline');
-		$view->headerImage = $store->get('headerImage');
+		$view->siteTitle = App::store()->get('siteTitle');
+		$view->siteTagline = App::store()->get('siteTagline');
+		$view->headerImage = App::store()->get('headerImage');
 		$view->currentUser = User::current();
-		$view->currentUrl = $this->getRequest()->url;
+		$view->currentUrl = $request->url;
 		$view->hideSignonBox = false;
 		return $view;
 	}
 
-	public function prepare(Request $request, \View $view = null) {
+	public function prepare(\View $view = null) {
+		$request = App::request();
 		if($this->etag != null && $this->etag == $request->cache['etag'] ||
 		   $this->modified != null && $this->modified == $request->cache['modified']) {
 		   $this->cached = true;
@@ -75,38 +75,29 @@ class HttpResponse extends Response {
 			$this->setHeader('status', '304 Not Modified');
 			$this->sendHeaders();
 		} else {
-			// TODO use php://input instead to avoid making a file
-			$hash = md5($this->request->requester['addr']);
-			$file = 'deadline://cache/' . 'page_' . $hash . '.html';
-
-			if(!$view->hasOutput()) {
-				// the view will handle the rest of its' own headers
-				$this->sendHeaders();
-				$view->output();
-			} else {
-				// the view won't handle headers, we need to buffer the output
-				// and send the headers at the end
-				$content = $view->output();
-				if($this->gzip) {
-					file_put_contents($file, gzencode($content, 9));
-					$this->setHeader('content encoding', 'gzip');
-				} else {
-					file_put_contents($file, $content);
-				}
-				$this->setHeader('content length', strlen($content));
-				unset($content);
-
-				$this->setHeader('content md5', base64_encode(md5_file($file)));
-				if($this->etag != null) {
-					$this->setHeader('etag', '"' . $this->etag . '"');
-				}
-				$this->setHeader('status', '200 OK');
-
-				$this->sendHeaders();
-				if(file_exists($file)) {
-					readfile($file);
-				}
+			// keep 5mb in memory, otherwise dump to a temp file
+			$fp = fopen('php://temp/maxmemory:5242880', 'r+');
+			$out = fopen('php://output', 'w+');
+			if($this->gzip && Mime::compress($this->headers['content type'])) {
+				Analog::log('Would use GZip encoding, but it\'s broke', Analog::DEBUG);
+				//$out = fopen('compress.zlib://php://output', 'w+');
+				//stream_filter_append($fp, 'zlib.deflate', STREAM_FILTER_READ, App::store()->get('compressionLevel', 6));
+				//$this->setHeader('content encoding', 'gzip');
 			}
+
+			$view->output($fp);
+			$size = ftell($fp);
+			$this->setHeader('content length', $size);
+			rewind($fp);
+
+			if($this->etag != null) {
+				$this->setHeader('etag', '"' . $this->etag . '"');
+			}
+			$this->setHeader('status', '200 OK');
+
+			Analog::log('Serving page as ' . $this->headers['content type'] . ' (' . $size . ' bytes)', Analog::DEBUG);
+			$this->sendHeaders();
+			stream_copy_to_stream($fp, $out);
 		}
 	}
 

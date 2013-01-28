@@ -1,7 +1,7 @@
 <?php
 require_once('autosave.php');
-require_once('request.php');
 require_once('container.php');
+require_once('request.php');
 
 class RequestTest extends PHPUnit_Framework_TestCase {
 	public function testBuild() {

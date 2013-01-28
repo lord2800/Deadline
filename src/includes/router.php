@@ -8,7 +8,6 @@ class Router {
 	private static $cacheFile = 'deadline://cache/routes.cache';
 
 	private function sortRoutes() {
-		// PHP < 5.4 doesn't support $this in a closure
 		$meta = $this->meta;
 		uksort($this->routes, function ($a, $b) use($meta) {
 			$ameta = $meta[$a];
@@ -46,10 +45,18 @@ class Router {
 
 		$parts = array_values(array_filter(explode('/', $route)));
 		$len = count($parts);
+		$partcount = $len;
 		for($i = 0; $i < $len && $parts[$i][0] != ':'; $i++);
-
+		// remove optional parameters from the count
+		foreach($parts as $part) {
+			if($part[0] == ':' && $part[1] == '?') {
+				$partcount--;
+			}
+		}
 		$this->meta[$route] = array(
 			'parts' => $parts,
+			'partcount' => $partcount,
+			'hasOptional' => $parts === $partcount,
 			'count' => $len,
 			'length' => $i
 		);
@@ -86,7 +93,7 @@ class Router {
 					$this->addRoute($route, $handler);
 					$this->tainted = true;
 				} else {
-					throw new \Exception("Route '$routes' is in an invalid format");
+					throw new \Exception("Route '$route' is in an invalid format");
 				}
 			}
 		} else {
@@ -133,16 +140,10 @@ class Router {
 		foreach($this->routes as $route => $handler) {
 			$routeparts = $this->meta[$route]['parts'];
 
-			$partcount = $this->meta[$route]['count'];
+			$partcount = $this->meta[$route]['partcount'];
 			$urlcount = count($urlparts);
-			// remove optional parameters from the count
-			foreach($routeparts as $part) {
-				if($part[0] == ':' && $part[1] == '?') {
-					$partcount--;
-				}
-			}
 			// if the required parts of the route are longer than the url, it can't possibly match
-			if($partcount > $urlcount) {
+			if($partcount > $urlcount || (!$this->meta[$route]['hasOptional'] && $partcount != $urlcount)) {
 				continue;
 			}
 
