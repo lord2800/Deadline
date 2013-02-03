@@ -1,5 +1,4 @@
 <?php
-
 require_once('mime.php');
 
 class MimeTest extends PHPUnit_Framework_TestCase {

@@ -1,4 +1,5 @@
 <?php
+require_once('analog.php');
 require_once('autosave.php');
 require_once('container.php');
 require_once('request.php');
