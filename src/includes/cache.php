@@ -42,6 +42,17 @@ class Apc implements CacheType {
 	function getLastError() { return 0; }
 }
 
+class Wincache implements CacheType {
+	public function __construct($dsn) {} // no need to init for wincache--local-based only
+	function add($key, $value, $expires = 0) { return wincache_ucache_add($key, $value, $expires); }
+	function update($key, $old, $new) { return wincache_ucache_cas($key, $old, $new); }
+	function increment($key, $step) { return wincache_ucache_inc($key, $step); }
+	function decrement($key, $step) { return wincache_ucache_dec($key, $step); }
+	function fetch($key) { return wincache_ucache_exists($key) ? wincache_ucache_get($key) : null; }
+	function remove($key) { return wincache_ucache_delete($key); }
+	function getLastError() { return 0; }
+}
+
 class Memcache implements CacheType {
 	// TODO support memcache and memcached modules
 	private $mc = null, $casTokens = array();
