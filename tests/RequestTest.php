@@ -144,5 +144,3 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($request->url, 'http://lord2800.me/test/page.php?var1=true&var2=xdf');
 	}
 }
-
-?>

@@ -7,17 +7,19 @@ class User extends \RedBean_SimpleModel {
 	private static $userBean = 'user';
 	private static $roleBean = 'role';
 
-	private static $cost = 7, $algo = 'Blowfish';
+	private static $cost = 7;
 	public static function current() {
 		$id = array_key_exists('id', $_SESSION) ? $_SESSION['id'] : null;
 		$user = R::load(static::$userBean, $id);
 		return $user;
 	}
-	public static function init($algo = 'Blowfish', $cost = 7) {
-		Password::init($algo);
-		static::$algo = $algo;
-		static::$cost = $cost;
-
+	public function nonce($maxlen = 22) {
+		$strong = false;
+		while(!$strong) $bytes = openssl_random_pseudo_bytes((int)($maxlen*3/4+1), $strong);
+		$salt = substr(base64_encode($bytes), 0, $maxlen);
+		return $salt;
+	}
+	public static function init($cost = 7) {
 		session_cache_limiter('');
 		$params = session_get_cookie_params();
 		session_set_cookie_params(0, $params['path'], $params['domain'], $params['secure'], true);
@@ -47,9 +49,9 @@ class User extends \RedBean_SimpleModel {
 			return false;
 		}
 
-		if(Password::current()->verify($pass, $user->pass)) {
-			if(Password::current()->need_rehash($user->pass, static::$algo, static::$cost)) {
-				$user->pass = Password::current()->hash($pass, static::$cost);
+		if(Password::verify($pass, $user->pass)) {
+			if(Password::need_rehash($user->pass, static::$cost)) {
+				$user->pass = Password::hash($pass, static::$cost);
 			}
 			$_SESSION['id'] = $user->id;
 			$params = session_get_cookie_params();

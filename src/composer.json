@@ -1,17 +1,18 @@
 {
-    "name": "lord2800/deadline",
-    "description": "Speedy PHP 5.3+ framework for simple website building",
-    "require": {
-        "phptal/phptal": "dev-master",
-        "gabordemooij/redbean": "v3.3.6",
-	"analog/analog": "dev-master",
-	"cbednarski/php-markdown": "dev-master"
-    },
-    "minimum-stability": "dev",
-    "authors": [
-        {
-            "name": "Jeff Hubbard",
-            "email": "jelhubbard@gmail.com"
-        }
-    ]
+	"name": "lord2800/deadline",
+	"description": "Speedy PHP 5.3+ framework for simple website building",
+	"require": {
+		"phptal/phptal": "dev-master",
+		"gabordemooij/redbean": "v3.3.6",
+		"ircmaxell/password-compat": "1.0.*@dev",
+		"analog/analog": "dev-master",
+		"cbednarski/php-markdown": "dev-master"
+	},
+	"minimum-stability": "dev",
+	"authors": [
+		{
+			"name": "Jeff Hubbard",
+			"email": "jelhubbard@gmail.com"
+		}
+	]
 }

@@ -106,7 +106,6 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 		list($handler, $args) = $result;
 		$this->assertEquals('test', $handler['controller']);
 		$this->assertEquals('optional', $handler['method']);
-		//var_dump($args);
 		$this->assertEquals('1', $args['id']);
 		return $router;
 	}
@@ -140,5 +139,3 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 		return $router;
 	}
 }
-
-?>
