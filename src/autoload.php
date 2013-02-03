@@ -9,6 +9,7 @@ The caveat is, this file must always reside at the base of the deadline path. If
 
 namespace Deadline;
 
+use Analog;
 use \FilesystemIterator as FS;
 
 class PathWrapper {
@@ -174,6 +175,7 @@ class PathWrapper {
 }
 
 PathWrapper::init();
+require_once(__DIR__ . '/includes/analog.php');
 
 class LibraryFilter extends \FilterIterator {
 	public function accept() {
@@ -221,9 +223,10 @@ class Autoload {
 			}
 		}
 		spl_autoload_register(__CLASS__ . '::load');
-		Autosave::register(__CLASS__ . '::autosave');
+		register_shutdown_function(function () { Autoload::autosave(); });
 	}
 	public static function autosave() {
+		Analog::log('Saving autoload cache', Analog::DEBUG);
 		if(static::$tainted) {
 			if(!is_dir(dirname(static::$cacheFile))) {
 				mkdir(dirname(static::$cacheFile), 0700);
@@ -245,9 +248,11 @@ class Autoload {
 		$fname = strtolower(implode('/', $parts)) . '.php';
 
 		if(array_key_exists($fname, static::$cache)) {
+			//Analog::log('Loading ' . $name . ' from cache', Analog::DEBUG);
 			require_once(static::$cache[$fname]);
 			return;
 		} else {
+			//Analog::log('Searching for ' . $name, Analog::DEBUG);
 			$file = static::oldSearch($fname);
 			if($file != null) {
 				static::$cache[$fname] = $file;
@@ -288,9 +293,4 @@ class Autoload {
 
 Autoload::init();
 
-function on_shutdown() {
-	//Autosave::save();
-}
-
 set_error_handler(function ($errno, $str, $file, $line, $context) { throw new \ErrorException($str, $errno, 0, $file, $line); });
-register_shutdown_function(__NAMESPACE__ . '\on_shutdown');

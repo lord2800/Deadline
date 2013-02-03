@@ -6,7 +6,7 @@ class Storage {
 	private $tainted = false;
 	private $file = '';
 
-	public function __construct() { Autosave::register(array(&$this, 'autosave')); }
+	public function __construct() { Autosave::register(array(&$this, 'autosave'), 'storage'); }
 	public function autosave() { if($this->tainted && $this->file != '') { $this->save($this->file); } }
 
 	public function load($file) {

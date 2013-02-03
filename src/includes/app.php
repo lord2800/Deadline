@@ -6,8 +6,8 @@ use Analog;
 
 class App {
 	private static $app;
-	public static function init($settings = 'deadline://settings.json', $routes = 'deadline://routes.json') {
-		Analog::log('App startup; settings file: ' . $settings . ', routes file: ' . $routes, Analog::DEBUG);
+	public static function init($settings = 'deadline://settings.json') {
+		Analog::log('App startup; settings file: ' . $settings, Analog::DEBUG);
 		register_shutdown_function(function ($start) {
 			$ms = (microtime(true) - $start) * 1000;
 			$sizes = array('', 'K', 'M', 'G', 'T');
@@ -28,7 +28,9 @@ class App {
 		$app->response = new HttpResponse($app->request);
 
 		$app->storage->load($settings);
-		$app->router->load($routes);
+		$app->cache = new Cache($app->storage->get('cache', (object)array('type' => 'apc', 'dsn' => '')));
+		$app->router->load($app->storage->get('routeFile', 'deadline://routes.json'));
+
 
 		$db = array(
 			'live' => array('dsn' => 'sqlite::memory:', 'user' => null, 'pass' => null),
@@ -39,12 +41,12 @@ class App {
 		R::setup($db->$mode->dsn, $db->$mode->user, $db->$mode->pass);
 		R::freeze(App::live());
 
-		$security = $app->storage->get('security', (object)array('algo'=>'Blowfish', 'costFactor'=>7));
-		User::init($security->algo, $security->costFactor);
+		$security = $app->storage->get('security', (object)array('costFactor'=>7));
+		User::init($security->costFactor);
 
 		error_reporting(-1);
 		if(App::live()) {
-			set_exception_handler(function ($e) use($app) { $app->shutdown(); });
+			set_exception_handler(function ($e) use($app) { $app->shutdown(); die(); });
 		}
 		register_shutdown_function(function () use($app) { $app->shutdown(); });
 
@@ -52,13 +54,14 @@ class App {
 	}
 	public static function current() { return static::$app; }
 
-	public static function live() { return static::store()->get('live', false); }
-	public static function request() { return static::current()->request; }
+	public static function live()     { return static::store()->get('live', false); }
+	public static function request()  { return static::current()->request; }
 	public static function response() { return static::current()->response; }
-	public static function store() { return static::current()->storage; }
-	public static function router() { return static::current()->router; }
+	public static function store()    { return static::current()->storage; }
+	public static function router()   { return static::current()->router; }
+	public static function cache()    { return static::current()->cache; }
 
-	private $storage, $router, $request, $response;
+	private $storage, $router, $cache, $request, $response;
 	private function __construct() {}
 
 	public function run() {
@@ -94,10 +97,12 @@ class App {
 	}
 
 	private function shutdown($e = null) {
+		Autosave::save();
+
 		$e = $e or error_get_last();
 		if($e != null) {
 			Analog::log(json_encode($e));
-			if(App::live()) {
+			if($this->live()) {
 				// display a hardcoded 'oops' page
 			} else {
 				// display diagnostic page

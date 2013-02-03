@@ -1,11 +1,12 @@
 <?php
 namespace Deadline;
 
+use Analog;
+
 class Router {
 	private $routes = array(), $meta = array();
 	private $tainted = false;
 	private $file = '';
-	private static $cacheFile = 'deadline://cache/routes.cache';
 
 	private function sortRoutes() {
 		$meta = $this->meta;
@@ -27,16 +28,13 @@ class Router {
 	}
 
 	public function __construct() {
-		Autosave::register(array(&$this, 'autosave'));
+		Autosave::register(array(&$this, 'autosave'), 'router');
 	}
 	public function autosave() {
+		App::cache()->add($this->file, array('routes' => $this->routes, 'meta' => $this->meta));
 		// if the user saved the routes to a file before and the routes are tainted, save it there again
 		if($this->tainted && $this->file != '') {
 			$this->save($this->file);
-		}
-		// if it's tainted, always save it to the cache
-		if($this->tainted) {
-			$this->save(static::$cacheFile);
 		}
 	}
 
@@ -63,7 +61,13 @@ class Router {
 	}
 
 	public function load($file) {
-		if(file_exists($file)) {
+		$cache = App::cache()->fetch($file);
+		if($cache != null) {
+			Analog::log('Loading routes from cache', Analog::DEBUG);
+			$this->routes = $cache['routes'];
+			$this->meta = $cache['meta'];
+		} else if(file_exists($file)) {
+			Analog::log('Loading routes from file', Analog::DEBUG);
 			$routes = json_decode(file_get_contents($file));
 			if($routes === null) {
 				throw new \UnexpectedValueException('Router JSON file ' . $file . ' is malformed! (error: ' . json_last_error() . ')');
