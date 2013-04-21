@@ -1,4 +1,6 @@
 {
+	"name": "lord2800/Deadline",
+	"type": "library",
 	"require":{
 		"php":">=5.4",
 		"analog/analog":"dev-master",
