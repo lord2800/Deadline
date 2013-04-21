@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "4406e66e6aa337ba1d16233f842c775b",
+    "hash": "86e01db30131dfa915aacbc88b9a8e71",
     "packages": [
         {
             "name": "analog/analog",
@@ -109,12 +109,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/cartalyst/sentry.git",
-                "reference": "a92e56d4b6c611589ad5e4a2d30949b4c61d0e2c"
+                "reference": "992880f0baa0391804f560308774cf1a3c46bf4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cartalyst/sentry/zipball/a92e56d4b6c611589ad5e4a2d30949b4c61d0e2c",
-                "reference": "a92e56d4b6c611589ad5e4a2d30949b4c61d0e2c",
+                "url": "https://api.github.com/repos/cartalyst/sentry/zipball/992880f0baa0391804f560308774cf1a3c46bf4d",
+                "reference": "992880f0baa0391804f560308774cf1a3c46bf4d",
                 "shasum": ""
             },
             "require": {
@@ -200,7 +200,7 @@
                 "laravel",
                 "security"
             ],
-            "time": "2013-04-15 08:23:43"
+            "time": "2013-04-20 02:52:52"
         },
         {
             "name": "gabordemooij/redbean",
@@ -338,12 +338,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pornel/PHPTAL.git",
-                "reference": "e4c2c36a44a05eaec07c460c9480a69056ab24a8"
+                "reference": "2472ae1a7d21999881c548b443a5cecbe945895d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pornel/PHPTAL/zipball/e4c2c36a44a05eaec07c460c9480a69056ab24a8",
-                "reference": "e4c2c36a44a05eaec07c460c9480a69056ab24a8",
+                "url": "https://api.github.com/repos/pornel/PHPTAL/zipball/2472ae1a7d21999881c548b443a5cecbe945895d",
+                "reference": "2472ae1a7d21999881c548b443a5cecbe945895d",
                 "shasum": ""
             },
             "require": {
@@ -378,7 +378,7 @@
                 "template engine",
                 "zope"
             ],
-            "time": "2013-01-14 15:59:18"
+            "time": "2013-04-17 16:25:11"
         },
         {
             "name": "psr/log",
