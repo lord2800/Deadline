@@ -63,10 +63,12 @@ final class App {
 
 	public static function create(array $config = []) {
 		$config = array_merge([
-			'settings' => 'deadline://settings.json',
+			'settings' => '',
 			'log' => 'firephp://dummy',
 			'benchmark' => 'XDebug',
+			'project_name' => 'project'
 		], $config);
+		$config['settings'] = empty($config['settings']) ? $config['project_name'] . '://settings.json' : $config['settings'];
 
 		ob_start();
 
@@ -95,6 +97,7 @@ final class App {
 		// and does so in untestable ways
 		$app->logger->debug('Initializing stream wrapper');
 		DeadlineStreamWrapper::init();
+		ProjectStreamWrapper::init($config['project_name']);
 
 		$app->logger->debug('Creating instance factory');
 		$app->instancefactory = new InstanceFactory();

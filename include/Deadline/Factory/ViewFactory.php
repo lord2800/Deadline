@@ -15,7 +15,8 @@ use Deadline\App,
 	Deadline\IStorage,
 	Deadline\ICache,
 	Deadline\Request,
-	Deadline\Response;
+	Deadline\Response,
+	Deadline\ProjectStreamWrapper;
 
 class ViewFactory {
 	private $ns, $instancefactory, $logger, $cache;
@@ -88,8 +89,9 @@ class ViewFactory {
 				}
 			}
 		}
-		if(is_dir('deadline://View')) {
-			$files = new Iterator(new DirectoryIterator('deadline://View', FS::SKIP_DOTS | FS::CURRENT_AS_FILEINFO | FS::KEY_AS_PATHNAME));
+		$viewPath = ProjectStreamWrapper::getProjectName() . '://View';
+		if(is_dir($viewPath)) {
+			$files = new Iterator(new DirectoryIterator($viewPath, FS::SKIP_DOTS | FS::CURRENT_AS_FILEINFO | FS::KEY_AS_PATHNAME));
 			foreach($files as $file) {
 				if(pathinfo($file, PATHINFO_EXTENSION) === 'php') {
 					if(!in_array(\Deadline\DeadlineStreamWrapper::resolve($file), get_included_files())) {
