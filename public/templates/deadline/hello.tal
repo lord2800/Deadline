@@ -1,0 +1,8 @@
+<tal:block metal:use-macro="base.tal/base-html">
+	<tal:block metal:fill-slot="head">
+		<title>Hello, world</title>
+	</tal:block>
+	<tal:block metal:fill-slot="body">
+		<p i18n:translate="">Hello, <span tal:omit-tag="" i18n:name="name">${name}</span>!</p>
+	</tal:block>
+</tal:block>

@@ -1,0 +1,5 @@
+{
+	"default":{
+		"Hello, ${name}!":"Hello, ${name}!"
+	}
+}

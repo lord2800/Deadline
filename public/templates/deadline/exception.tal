@@ -1,0 +1,36 @@
+<tal:block metal:use-macro="base.tal/base-html">
+	<tal:block metal:fill-slot="head">
+		<title>
+			<tal:block content="exception/getClass"/>
+			-
+			<tal:block content="exception/getMessage | default">Error!</tal:block>
+		</title>
+		<style type="text/css">
+			section#content { width: 75%; margin: 45px auto; }
+			span.line-number { width: 30px; float: left; }
+			span.line { float: left; }
+		</style>
+	</tal:block>
+	<tal:block metal:fill-slot="body">
+		<section id="content" class="well">
+			<h1>
+				<tal:block content="exception/getMessage | default">Error</tal:block> - <tal:block content="exception/getClass"/>
+			</h1>
+			<div>
+				<p>in <tal:block content="exception/getFile"/> on <tal:block content="exception/getLine"/></p>
+				Backtrace:
+				<ul>
+					<li tal:repeat="trace exception/getStringTraceLines" tal:content="trace"/>
+				</ul>
+				Around:
+				<div class="well">
+					<tal:block repeat="line exception/getLinesAround">
+						<span tal:content="repeat/line/key" class="line-number"/>
+						<span tal:content="line" class="line"/>
+						<br/>
+					</tal:block>
+				</div>
+			</div>
+		</section>
+	</tal:block>
+</tal:block>

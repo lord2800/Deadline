@@ -1,0 +1,8 @@
+{
+	"dependencies": {
+		"csslint": "*",
+		"clean-css": "*",
+		"jshint": "*",
+		"uglify-js": "*"
+	}
+}
