@@ -41,7 +41,7 @@ class Html extends View {
 			->addPreFilter(new PHPTAL_PreFilter_StripComments())
 			->addPreFilter(new PHPTAL_PreFilter_Normalize())
 			->addPreFilter(new PHPTAL_PreFilter_Compress())
-			->setPostFilter(new UrlPostFilter($app->getBaseUrl(), $template))
+			->setPostFilter(new UrlPostFilter($this->app->getBaseUrl(), $template))
 			->setTranslator(new KeyValueTranslationService($this->translator))
 			->setTemplate($response->template);
 
