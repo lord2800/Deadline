@@ -1,5 +1,0 @@
-<tal:block metal:use-macro="macros.tal/page">
-	<tal:block metal:fill-slot="content">
-		<tal:block content="structure content" />
-	</tal:block>
-</tal:block>
