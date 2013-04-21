@@ -7,7 +7,7 @@ use Deadline\App,
 	Deadline\Response,
 	Deadline\IStorage,
 	Deadline\ITranslationService,
-	Deadline\DeadlineStreamWrapper;
+	Deadline\ProjectStreamWrapper;
 
 use \PHPTAL;
 use \PHPTAL_Filter;
