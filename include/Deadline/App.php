@@ -44,7 +44,6 @@ final class App {
 		if(($ssl && $port != '443') || $port != '80') {
 			$url .= ':' . $port;
 		}
-		$url .= '/';
 		return $url;
 	}
 
