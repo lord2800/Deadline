@@ -37,7 +37,7 @@ class Html extends View {
 			->setEncoding('UTF-8')
 			->setForceReparse(!$this->store->get('live', false))
 			->setPhpCodeDestination(ProjectStreamWrapper::getProjectName() . '://cache')
-			->setTemplateRepository(DeadlineStreamWrapper::resolve(ProjectStreamWrapper::getProjectName() . '://public/templates/' . $template))
+			->setTemplateRepository(ProjectStreamWrapper::resolve(ProjectStreamWrapper::getProjectName() . '://public/templates/' . $template))
 			->addPreFilter(new PHPTAL_PreFilter_StripComments())
 			->addPreFilter(new PHPTAL_PreFilter_Normalize())
 			->addPreFilter(new PHPTAL_PreFilter_Compress())
