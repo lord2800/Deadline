@@ -2,6 +2,7 @@
 namespace Deadline\View;
 
 use Deadline\View,
+	Deadline\Request,
 	Deadline\Response,
 	Deadline\IStorage,
 	Deadline\ITranslationService,
@@ -17,10 +18,11 @@ use \PHPTAL_TranslationService;
 use Analog\Analog;
 
 class Html extends View {
-	public $translator = null, $store;
-	public function __construct(ITranslationService $translator, IStorage $store) {
+	public $translator = null, $store, $app;
+	public function __construct(ITranslationService $translator, IStorage $store, App $app) {
 		$this->translator = $translator;
 		$this->store = $store;
+		$this->app = $app;
 	}
 	public function getContentType() { return 'text/html'; }
 
@@ -38,7 +40,7 @@ class Html extends View {
 			->addPreFilter(new PHPTAL_PreFilter_StripComments())
 			->addPreFilter(new PHPTAL_PreFilter_Normalize())
 			->addPreFilter(new PHPTAL_PreFilter_Compress())
-			->setPostFilter(new UrlPostFilter('http://localhost', $template))
+			->setPostFilter(new UrlPostFilter($app->getBaseUrl(), $template))
 			->setTranslator(new KeyValueTranslationService($this->translator))
 			->setTemplate($response->template);
 

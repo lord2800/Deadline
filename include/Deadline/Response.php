@@ -42,10 +42,10 @@ class Response {
 		return $this->params;
 	}
 
-	public function setCookie($name, $value, \DateTime $expiry = null, $path = '/', $domain = '', $httpOnly = true, $secure = false) {
+	public function setCookie($name, $value, \DateTime $expiry = null, $path = '/', $domain = false, $httpOnly = true, $secure = false) {
 		// without a set value, set the cookie for +5 minutes
 		if(empty($expiry)) $expiry = new \DateTime("+5 minutes");
-		setcookie($name, $value, $expiry->getTimestamp(), $path, empty($domain) ? 'localhost' : $domain, $secure, $httpOnly);
+		setcookie($name, $value, $expiry->getTimestamp(), $path, $domain, $secure, $httpOnly);
 	}
 
 	public function setHeader($name, $value, $replace = false) {

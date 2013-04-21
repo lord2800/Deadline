@@ -11,7 +11,7 @@ class DeadlineStreamWrapper {
 		$phar = \Phar::running();
 		if(empty($phar)) {
 			// we're not running in phar mode--we can safely use realpath() to determine the full path
-			static::$real = static::$base = dirname(dirname(dirname(__FILE__)));
+			static::$real = static::$base = dirname(dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
 		} else {
 			// we're running in phar mode, so we should try a phar-relative path if not a real path
 			static::$pharMode = true;

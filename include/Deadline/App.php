@@ -34,6 +34,19 @@ final class App {
 
 	public function mode() { return $this->live() ? 'production' : 'debug'; }
 	public function live() { return $this->store->get('live', false); }
+	public function getBaseUrl() {
+		$request = $this->instancefactory->get('Request');
+		$ssl = $request->serverInput('https', 'string') === 'on';
+		$port = $request->getHeader('server port');
+		$url = 'http';
+		$url .= $ssl == true ? 's' : '';
+		$url .= '://' . $request->getHeader('host');
+		if(($ssl && $port != '443') || $port != '80') {
+			$url .= ':' . $port;
+		}
+		$url .= '/';
+		return $url;
+	}
 
 	private $store,
 			$logger,
@@ -97,6 +110,11 @@ final class App {
 		$app->store = $app->storefactory->get($config);
 		$app->instancefactory->addDependent('store', $app->store);
 
+		$app->logger->debug('Creating request');
+		$request = $app->instancefactory->get('Request');
+		static::$monitor->snapshot('Request created');
+		$app->instancefactory->addDependent('request', $request);
+
 		$app->logger->debug('Creating cache factory');
 		$app->cachefactory = $app->instancefactory->get('CacheFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Cache factory created');
@@ -127,11 +145,6 @@ final class App {
 		$app->routerfactory = $app->instancefactory->get('RouterFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Router factory created');
 		$app->instancefactory->addDependent('routerfactory', $app->routerfactory);
-
-		$app->logger->debug('Creating request');
-		$request = $app->instancefactory->get('Request');
-		static::$monitor->snapshot('Request created');
-		$app->instancefactory->addDependent('request', $request);
 
 		$app->logger->debug('We are in ' . $app->mode() . ' mode');
 
