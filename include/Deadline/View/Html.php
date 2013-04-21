@@ -1,7 +1,8 @@
 <?php
 namespace Deadline\View;
 
-use Deadline\View,
+use Deadline\App,
+	Deadline\View,
 	Deadline\Request,
 	Deadline\Response,
 	Deadline\IStorage,
