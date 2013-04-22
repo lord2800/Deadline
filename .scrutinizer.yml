@@ -9,7 +9,7 @@ tools:
         enabled: true
         filter:
             paths: [include/*, public/*]
-            excluded_paths: [vendor/*, build/*, cache/*, node_modules/*, tests/*, include/Deadline/DeadlineStreamWrapper.php]
+            excluded_paths: [vendor/*, build/*, cache/*, node_modules/*, tests/*, include/Deadline/DeadlineStreamWrapper.php, include/Deadline/PathStreamWrapper.php, include/Deadline/ProjectStreamWrapper.php]
 
     php_cs_fixer:
         enabled: true
@@ -27,7 +27,7 @@ tools:
         enabled: true
         filter:
             paths: [include/*, public/*]
-            excluded_paths: [vendor/*, build/*, cache/*, node_modules/*, tests/*, include/Deadline/DeadlineStreamWrapper.php]
+            excluded_paths: [vendor/*, build/*, cache/*, node_modules/*, tests/*, include/Deadline/DeadlineStreamWrapper.php, include/Deadline/PathStreamWrapper.php, include/Deadline/ProjectStreamWrapper.php]
 
     php_cpd:
         enabled: true

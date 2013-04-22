@@ -12,7 +12,8 @@ use Psr\Log\LoggerInterface;
 use Deadline\App,
 	Deadline\IStorage,
 	Deadline\RouteMatch,
-	Deadline\ProjectStreamWrapper;
+	Deadline\ProjectStreamWrapper,
+	Deadline\DeadlineStreamWrapper;
 
 class ControllerFactory {
 	private $ns, $instancefactory, $logger;
@@ -46,7 +47,7 @@ class ControllerFactory {
 		$files = new Iterator(new DirectoryIterator('deadline://include/Deadline/Controller', FS::SKIP_DOTS | FS::CURRENT_AS_FILEINFO | FS::KEY_AS_PATHNAME));
 		foreach($files as $file) {
 			if(pathinfo($file, PATHINFO_EXTENSION) === 'php') {
-				if(!in_array(\Deadline\DeadlineStreamWrapper::resolve($file), get_included_files())) {
+				if(!in_array(DeadlineStreamWrapper::resolve($file), get_included_files())) {
 					$class = $this->getNamespaceFromFile($file) . '\\' . basename($file, '.php');
 					class_exists($class, true);
 				}
@@ -57,7 +58,7 @@ class ControllerFactory {
 			$files = new Iterator(new DirectoryIterator($controllerPath, FS::SKIP_DOTS | FS::CURRENT_AS_FILEINFO | FS::KEY_AS_PATHNAME));
 			foreach($files as $file) {
 				if(pathinfo($file, PATHINFO_EXTENSION) === 'php') {
-					if(!in_array(\Deadline\DeadlineStreamWrapper::resolve($file), get_included_files())) {
+					if(!in_array(ProjectStreamWrapper::resolve($file), get_included_files())) {
 						$class = $this->getNamespaceFromFile($file) . '\\' . basename($file, '.php');
 						class_exists($class, true);
 					}
