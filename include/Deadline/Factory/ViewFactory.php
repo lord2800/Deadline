@@ -19,11 +19,12 @@ use Deadline\App,
 	Deadline\ProjectStreamWrapper;
 
 class ViewFactory {
-	private $ns, $instancefactory, $logger, $cache;
+	private $ns, $instancefactory, $logger, $cache, $store;
 
 	public function __construct(LoggerInterface $logger, IStorage $store, InstanceFactory $instancefactory, ICache $cache) {
 		$this->ns              = $store->get('view_namespace', 'Deadline\\View');
 		$this->instancefactory = $instancefactory;
+		$this->store           = $store;
 		$this->logger          = $logger;
 		$this->cache           = $cache;
 	}
@@ -74,8 +75,13 @@ class ViewFactory {
 	}
 
 	public function getAll() {
-		$this->logger->debug('Scanning for views');
 		$views = [];
+		$viewList = $this->store->get('views', ['Deadline\\View\\File', 'Deadline\\View\\Html', 'Deadline\\View\\Json', 'Deadline\\View\\Plain']);
+		foreach($viewList as $view) {
+			$views[] = new ReflectionClass($view);
+		}
+		/*
+		$this->logger->debug('Scanning for views');
 		$oldClasses = get_declared_classes();
 		// load all available views
 		// find the builtin and external views
@@ -109,6 +115,7 @@ class ViewFactory {
 			$this->logger->debug('Found view ' . $class);
 			$views[] = new ReflectionClass($class);
 		}
+		*/
 		return $views;
 	}
 }

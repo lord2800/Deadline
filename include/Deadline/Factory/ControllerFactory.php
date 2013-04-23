@@ -16,11 +16,12 @@ use Deadline\App,
 	Deadline\DeadlineStreamWrapper;
 
 class ControllerFactory {
-	private $ns, $instancefactory, $logger;
+	private $ns, $instancefactory, $logger, $store;
 
 	public function __construct(LoggerInterface $logger, IStorage $store, InstanceFactory $instancefactory) {
 		$this->ns              = $store->get('controller_namespace', 'Deadline\\Controller');
 		$this->logger          = $logger;
+		$this->store           = $store;
 		$this->instancefactory = $instancefactory;
 	}
 
@@ -38,8 +39,14 @@ class ControllerFactory {
 	}
 
 	public function getAll() {
-		$this->logger->debug('Scanning for controllers');
 		$controllers = [];
+		// TODO find a way to scan for controllers, this is a bad hack!
+		$controllerList = $this->store->get('controllers', ['Deadline\\Controller\\Hello']);
+		foreach($controllerList as $controller) {
+			$controllers[] = new ReflectionClass($controller);
+		}
+		/*
+		$this->logger->debug('Scanning for controllers');
 		$oldClasses = get_declared_classes();
 		// load all available controllers
 		// find the builtin and external controllers
@@ -73,6 +80,7 @@ class ControllerFactory {
 			$this->logger->debug('Found controller ' . $class);
 			$controllers[] = new ReflectionClass($class);
 		}
+		*/
 		return $controllers;
 	}
 
