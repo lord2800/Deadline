@@ -61,7 +61,7 @@ class Html extends View {
 	}
 }
 
-class IFilterPreFilter implements \PHPTAL_PreFilter {
+class IFilterPreFilter extends PHPTAL_PreFilter {
 	private $filter;
 	public function __construct(IFilter $filter) { $this->filter = $filter; }
 	public function filterElement(DOMElement $el) {
