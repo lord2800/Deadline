@@ -18,7 +18,7 @@ use PHPBenchmark\Monitor;
 use Http\Exception\Client\NotFound as HttpNotFound,
 	Http\Exception\Server\NotImplemented as HttpNotImplemented;
 
-final class App {
+class App {
 	private function __construct() {
 		register_shutdown_function(function ($start) {
 			$ms    = (microtime(true) - $start) * 1000;
@@ -32,8 +32,9 @@ final class App {
 	}
 
 
-	public function mode() { return $this->live() ? 'production' : 'debug'; }
-	public function live() { return $this->store->get('live', false); }
+	public final function mode() { return $this->live() ? 'production' : 'debug'; }
+	public final function live() { return $this->store->get('live', false); }
+	public function bootstrap() {}
 	public function getBaseUrl() {
 		$request = $this->instancefactory->get('Request');
 		$ssl = $request->serverInput('https', 'string') === 'on';
@@ -61,7 +62,7 @@ final class App {
 	// TODO: move this elsewhere
 	public static $monitor;
 
-	public static function create(array $config = []) {
+	public static final function create(array $config = []) {
 		$config = array_merge([
 			'settings' => '',
 			'log' => 'firephp://dummy',
@@ -72,7 +73,7 @@ final class App {
 
 		ob_start();
 
-		$app = new App();
+		$app = new static();
 
 		$monitorClass = 'Deadline\\' . (isset($config['benchmark']) ? $config['benchmark'] : 'Empty') . 'Benchmark';
 		static::$monitor = new $monitorClass();
@@ -156,12 +157,14 @@ final class App {
 		$handler = new ExceptionHandler(!$app->live(), $template);
 		$handler->register();
 
+		$app->bootstrap();
+
 		static::$monitor->snapshot('App bootstrap complete');
 
 		return $app;
 	}
 
-	public function serve() {
+	public final function serve() {
 		$this->logger->debug('Creating router instance');
 		$router = $this->routerfactory->get();
 		$router->loadRoutes();

@@ -14,12 +14,13 @@ use Psr\Log\LoggerInterface;
 use Deadline\App,
 	Deadline\IStorage,
 	Deadline\ICache,
+	Deadline\IFilter,
 	Deadline\Request,
 	Deadline\Response,
 	Deadline\ProjectStreamWrapper;
 
 class ViewFactory {
-	private $ns, $instancefactory, $logger, $cache, $store;
+	private $ns, $instancefactory, $logger, $cache, $store, $filters = [];
 
 	public function __construct(LoggerInterface $logger, IStorage $store, InstanceFactory $instancefactory, ICache $cache) {
 		$this->ns              = $store->get('view_namespace', 'Deadline\\View');
@@ -28,6 +29,8 @@ class ViewFactory {
 		$this->logger          = $logger;
 		$this->cache           = $cache;
 	}
+
+	public function addFilter(IFilter $filter) { $this->filters[] = $filter; }
 
 	private function getNamespaceFromFile($file) {
 		$tokens = token_get_all(file_get_contents($file));
@@ -53,6 +56,7 @@ class ViewFactory {
 		}
 		// set the content type in the response (but don't override it)
 		$response->setHeader('content type', $view->getContentType());
+		$view->setFilters($this->filters);
 
 		App::$monitor->snapshot('View initialized');
 		return $view;

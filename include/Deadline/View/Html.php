@@ -9,23 +9,28 @@ use Deadline\App,
 	Deadline\ITranslationService,
 	Deadline\ProjectStreamWrapper;
 
-use \PHPTAL;
-use \PHPTAL_Filter;
-use \PHPTAL_PreFilter_StripComments;
-use \PHPTAL_PreFilter_Normalize;
-use \PHPTAL_PreFilter_Compress;
-use \PHPTAL_TranslationService;
+use \DOMElement;
+
+use \PHPTAL,
+	\PHPTAL_Filter,
+	\PHPTAL_PreFilter,
+	\PHPTAL_PreFilter_StripComments,
+	\PHPTAL_PreFilter_Normalize,
+	\PHPTAL_PreFilter_Compress,
+	\PHPTAL_TranslationService;
 
 use Analog\Analog;
 
 class Html extends View {
-	public $translator = null, $store, $app;
+	public $translator = null, $store, $app, $filters;
 	public function __construct(ITranslationService $translator, IStorage $store, App $app) {
 		$this->translator = $translator;
 		$this->store = $store;
 		$this->app = $app;
 	}
-	public function getContentType() { return 'text/html'; }
+	public function getContentType() { return 'text/html; charset=UTF-8'; }
+
+	public function setFilters(array $filters) { $this->filters = $filters; }
 
 	public function render(Response $response) {
 		$template = $this->store->get('template', 'deadline');
@@ -45,10 +50,22 @@ class Html extends View {
 			->setTranslator(new KeyValueTranslationService($this->translator))
 			->setTemplate($response->template);
 
+		foreach($this->filters as $filter) {
+			$phptal->addPreFilter(new IFilterPreFilter($filter));
+		}
+
 		foreach($response->getParams() as $key => $value) {
 			$phptal->set($key, $value);
 		}
 		echo $phptal->execute();
+	}
+}
+
+class IFilterPreFilter implements \PHPTAL_PreFilter {
+	private $filter;
+	public function __construct(IFilter $filter) { $this->filter = $filter; }
+	public function filterElement(DOMElement $el) {
+		if($filter != null) $filter->filter($el);
 	}
 }
 
