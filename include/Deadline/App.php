@@ -48,16 +48,16 @@ class App {
 		return $url;
 	}
 
-	private $store,
-			$logger,
-			$storefactory,
-			$cachefactory,
-			$modelfactory,
-			$viewfactory,
-			$controllerfactory,
-			$instancefactory,
-			$routerfactory,
-			$translatorfactory;
+	protected $store,
+			  $logger,
+			  $storefactory,
+			  $cachefactory,
+			  $modelfactory,
+			  $viewfactory,
+			  $controllerfactory,
+			  $instancefactory,
+			  $routerfactory,
+			  $translatorfactory;
 
 	// TODO: move this elsewhere
 	public static $monitor;
