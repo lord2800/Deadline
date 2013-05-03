@@ -28,7 +28,7 @@ class Html extends View {
 		$this->store = $store;
 		$this->app = $app;
 	}
-	public function getContentType() { return 'text/html; charset=UTF-8'; }
+	public function getContentType() { return 'text/html'; }
 
 	public function setFilters(array $filters) { $this->filters = $filters; }
 
