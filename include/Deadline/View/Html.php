@@ -1,10 +1,13 @@
 <?php
 namespace Deadline\View;
 
+use Psr\Log\LoggerInterface;
+
 use Deadline\App,
 	Deadline\View,
 	Deadline\Request,
 	Deadline\Response,
+	Deadline\IFilter,
 	Deadline\IStorage,
 	Deadline\ITranslationService,
 	Deadline\ProjectStreamWrapper;
@@ -37,6 +40,7 @@ class Html extends View {
 
 		$this->translator->setLanguage($response->locale);
 
+		array_unshift($this->filters, new UrlPostFilter($this->app->getBaseUrl(), $template));
 		$phptal = new PHPTAL();
 		$phptal->setOutputMode(PHPTAL::HTML5)
 			->setEncoding('UTF-8')
@@ -46,13 +50,9 @@ class Html extends View {
 			->addPreFilter(new PHPTAL_PreFilter_StripComments())
 			->addPreFilter(new PHPTAL_PreFilter_Normalize())
 			->addPreFilter(new PHPTAL_PreFilter_Compress())
-			->setPostFilter(new UrlPostFilter($this->app->getBaseUrl(), $template))
+			->setPostFilter(new PostFilterChain($this->filters))
 			->setTranslator(new KeyValueTranslationService($this->translator))
 			->setTemplate($response->template);
-
-		foreach($this->filters as $filter) {
-			$phptal->addPreFilter(new IFilterPreFilter($filter));
-		}
 
 		foreach($response->getParams() as $key => $value) {
 			$phptal->set($key, $value);
@@ -61,11 +61,17 @@ class Html extends View {
 	}
 }
 
-class IFilterPreFilter extends PHPTAL_PreFilter {
+class PostFilterChain implements PHPTAL_Filter {
+	private $filters = [];
+	public function __construct(array $filters) { $this->filters = $filters; }
+	public function filter($code) { foreach($this->filters as $filter) $code = $filter->filter($code); return $code; }
+}
+
+class IFilterPostFilter implements PHPTAL_Filter {
 	private $filter;
 	public function __construct(IFilter $filter) { $this->filter = $filter; }
-	public function filterElement(DOMElement $el) {
-		if($filter != null) $filter->filter($el);
+	public function filter($code) {
+		if($this->filter != null) $this->filter->filter($el);
 	}
 }
 
