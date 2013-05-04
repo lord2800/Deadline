@@ -75,7 +75,7 @@ class ViewFactory {
 			$accept = 'text/plain';
 		}
 		list($type, $subtype) = explode('/', $accept);
-		return ucfirst($subtype);
+		return str_replace(' ', '', ucwords(str_replace('-', ' ', $subtype)));
 	}
 
 	public function getAll() {
