@@ -21,7 +21,10 @@ class Route implements JsonSerializable {
 	}
 	public function match($uri) {
 		$route = $this->route;
-		$variables = array_merge($this->optional, []);
+		$variables = []; //array_merge($this->optional, []);
+		foreach($this->optional as $var) {
+			$variables[$var['name']] = $var['default'];
+		}
 		for($i = 0, $j = 0, $len = min(strlen($uri), strlen($route)); $i < $len && $j < $len; $i++, $j++) {
 			// it doesn't match, fail
 			if($uri[$i] !== $route[$j] && $route[$j] !== ':') {
@@ -33,12 +36,15 @@ class Route implements JsonSerializable {
 			}
 		}
 		foreach($this->required as $key) {
-			$index = $this->order[$key['name']];
-			if(!isset($variables[$index])) {
+			if(!isset($variables[$key['name']])) {
 				return false;
 			}
 		}
-		return $variables;
+		$result = [];
+		foreach($variables as $name => $value) {
+			$result[$this->order[$name]] = $value;
+		}
+		return $result;
 	}
 	private function matchVariable(&$variables, &$uri, &$i, &$j, $route) {
 		// adjust for optional parameters
@@ -54,6 +60,6 @@ class Route implements JsonSerializable {
 		$pos  = $pos === false ? strlen($uri) : $pos;
 		$val  = substr($uri, $i, $pos);
 		$i    = $pos + 1;
-		$variables[$this->order[$name]] = $val;
+		$variables[$name] = $val;
 	}
 }
