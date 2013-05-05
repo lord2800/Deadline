@@ -220,18 +220,13 @@ class App {
 	private function configureDefaultResponseValues(Request $request, Response $response) {
 		$this->logger->debug('Setting default response values (if nonexistent)');
 		// TODO this seems like the wrong place for language settings
-		if(!isset($response->lang)) {
+		// do we have a locale from a cookie?
+		if(empty($request->cookieInput('lang', 'string'))) {
+			$this->logger->debug('Locale not found in a cookie, inferring from Accept-Language header');
+			// nope, infer it from Accept-Language
 			$parser = $this->instancefactory->get('QualityParser');
-			// do we have a locale from a cookie?
-			$locale = $request->cookieInput('lang', 'string');
-			if(empty($locale)) {
-				$this->logger->debug('Locale not found in a cookie, inferring from Accept-Language header');
-				// nope, infer it from Accept-Language
-				$locale = $parser->bestQuality($request->getHeader('Accept-Language'));
-			}
-			$locale = str_replace('-', '_', $locale);
+			$locale = str_replace('-', '_', $parser->bestQuality($request->getHeader('Accept-Language')));
 			$this->logger->debug('Determined locale: ' . $locale);
-			$response->lang = $locale;
 			$response->setHeader('Content-Language', $locale);
 			$response->setCookie('lang', $locale);
 		}
