@@ -18,7 +18,9 @@ class File extends View {
 
 	public function render(Response $response) {
 		$output = fopen('php://output', 'w');
-		stream_copy_to_stream($response->getFileHandle(), $output, $response->size, $response->offset);
+		$input = fopen($response->file, 'r');
+		stream_copy_to_stream($input, $output, $response->size, $response->offset);
+		fclose($input);
 		fclose($output);
 	}
 }
