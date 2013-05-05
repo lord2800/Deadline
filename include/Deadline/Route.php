@@ -33,7 +33,7 @@ class Route implements JsonSerializable {
 			}
 		}
 		foreach($this->required as $key) {
-			$index = $order[$key['name']];
+			$index = $this->order[$key['name']];
 			if(!isset($variables[$index])) {
 				return false;
 			}
