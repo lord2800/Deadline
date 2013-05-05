@@ -81,7 +81,7 @@ class RestRouter extends Router {
 
 				$verb = $matches[1];
 				$method = $matches[2];
-				$route = '/' . $base . '/' . $method;
+				$route = '/' . $base . (!empty($method) ? '/' : '') . $method;
 
 				$order = [];
 				$required = [];
@@ -90,8 +90,14 @@ class RestRouter extends Router {
 				for($i = 0, $len = count($params); $i < $len; $i++) {
 					$parameter = $params[$i];
 					$order[$parameter->getName()] = $i;
-					if($parameter->isOptional()) $optional[] = ['name' => $parameter->getName(), 'default' => $parameter->getDefaultValue()];
-					else $required[] = ['name' => $parameter->getName()];
+					if($parameter->isOptional()) {
+						$optional[] = ['name' => $parameter->getName(), 'default' => $parameter->getDefaultValue()];
+						$route .= '/:?' . $parameter->getName();
+					}
+					else {
+						$required[] = ['name' => $parameter->getName()];
+						$route .= '/:' . $parameter->getName();
+					}
 				}
 				$this->logger->debug('Adding route ' . $route . ' for ' . $class . '::' . $routable->getName());
 				$routes[] = new RestRoute($verb, $route, $class, $routable->getName(), $order, $required, $optional);

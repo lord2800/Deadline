@@ -29,7 +29,7 @@ class Route implements JsonSerializable {
 			}
 
 			if($route[$j] === ':') {
-				$this->matchVariable($i, $j, $route);
+				$this->matchVariable($variables, $uri, $i, $j, $route);
 			}
 		}
 		foreach($this->required as $key) {
@@ -40,9 +40,9 @@ class Route implements JsonSerializable {
 		}
 		return $variables;
 	}
-	private function matchVariable(&$i, &$j, $route) {
+	private function matchVariable(&$variables, &$uri, &$i, &$j, $route) {
 		// adjust for optional parameters
-		$add = $route[$j + 1] !== '?' ? 1 : 2;
+		$add  = $route[$j + 1] !== '?' ? 1 : 2;
 
 		// it's a variable, capture it
 		$pos  = stripos($route, '/', $j + $add);
@@ -54,6 +54,6 @@ class Route implements JsonSerializable {
 		$pos  = $pos === false ? strlen($uri) : $pos;
 		$val  = substr($uri, $i, $pos);
 		$i    = $pos + 1;
-		$variables[$order[$name]] = $val;
+		$variables[$this->order[$name]] = $val;
 	}
 }
