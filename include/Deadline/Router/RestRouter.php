@@ -43,10 +43,12 @@ class RestRouter extends Router {
 
 	public function loadRoutes() {
 		$routes = $this->cache->get('routes');
-		foreach($routes as $route) {
-			if(!($route instanceof Route)) {
-				$routes = [];
-				break;
+		if(!empty($routes)) {
+			foreach($routes as $route) {
+				if(!($route instanceof Route)) {
+					$routes = [];
+					break;
+				}
 			}
 		}
 
