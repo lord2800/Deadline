@@ -221,7 +221,8 @@ class App {
 		$this->logger->debug('Setting default response values (if nonexistent)');
 		// TODO this seems like the wrong place for language settings
 		// do we have a locale from a cookie?
-		if(empty($request->cookieInput('lang', 'string'))) {
+		$locale = $request->cookieInput('lang', 'string');
+		if(empty($locale)) {
 			$this->logger->debug('Locale not found in a cookie, inferring from Accept-Language header');
 			// nope, infer it from Accept-Language
 			$parser = $this->instancefactory->get('QualityParser');
