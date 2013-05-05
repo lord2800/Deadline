@@ -48,14 +48,23 @@ class ViewFactory {
 	public function get(Request $request, Response $response) {
 		$result = null;
 		// does the response dictate a type (i.e. download)?
+		$view = null;
 		if($response->getDownloadable()) {
-			$view = $this->instancefactory->get('FileView', ['try' => $this->ns]);
-		} else {
+			$view = $this->instancefactory->get('File', ['try' => $this->ns]);
+		}
+		if($view == null && $response->getType() !== null) {
+			// try to honor the response's preferred type
+			$type = $this->getViewType($response->getType());
+			try {
+				$view = $this->instancefactory->get($type, ['try' => $this->ns]);
+			} catch(\RuntimeException $e) {} // we couldn't find the type, safely ignore it and move on
+		} 
+		if($view == null) {
 			$type = $this->getViewType($request->getHeader('accept'));
 			$view = $this->instancefactory->get($type, ['try' => $this->ns]);
 		}
 		// set the content type in the response (but don't override it)
-		$response->setHeader('content type', $view->getContentType());
+		$response->setHeader('content type', $view->getContentType(), false);
 		$view->setFilters($this->filters);
 
 		App::$monitor->snapshot('View initialized');
