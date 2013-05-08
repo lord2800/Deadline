@@ -12,6 +12,7 @@ use Bitworking\Mimeparse;
 use Psr\Log\LoggerInterface;
 
 use Deadline\App,
+	Deadline\Injector,
 	Deadline\IStorage,
 	Deadline\ICache,
 	Deadline\IFilter,
@@ -20,14 +21,14 @@ use Deadline\App,
 	Deadline\ProjectStreamWrapper;
 
 class ViewFactory {
-	private $ns, $instancefactory, $logger, $cache, $store, $filters = [];
+	private $ns, $injector, $logger, $cache, $store, $filters = [];
 
-	public function __construct(LoggerInterface $logger, IStorage $store, InstanceFactory $instancefactory, ICache $cache) {
-		$this->ns              = $store->get('view_namespace', 'Deadline\\View');
-		$this->instancefactory = $instancefactory;
-		$this->store           = $store;
-		$this->logger          = $logger;
-		$this->cache           = $cache;
+	public function __construct(LoggerInterface $logger, IStorage $store, Injector $injector, ICache $cache) {
+		$this->ns       = $store->get('view_namespace', 'Deadline\\View');
+		$this->injector = $injector;
+		$this->store    = $store;
+		$this->logger   = $logger;
+		$this->cache    = $cache;
 	}
 
 	public function addFilter(IFilter $filter) { $this->filters[] = $filter; }
@@ -50,18 +51,18 @@ class ViewFactory {
 		// does the response dictate a type (i.e. download)?
 		$view = null;
 		if($response->getDownloadable()) {
-			$view = $this->instancefactory->get('File', ['try' => $this->ns]);
+			$view = $this->injector->get('File', ['try' => $this->ns]);
 		}
 		if($view == null && $response->getType() !== null) {
 			// try to honor the response's preferred type
 			$type = $this->getViewType($response->getType());
 			try {
-				$view = $this->instancefactory->get($type, ['try' => $this->ns]);
+				$view = $this->injector->get($type, ['try' => $this->ns]);
 			} catch(\RuntimeException $e) {} // we couldn't find the type, safely ignore it and move on
 		} 
 		if($view == null) {
 			$type = $this->getViewType($request->getHeader('accept'));
-			$view = $this->instancefactory->get($type, ['try' => $this->ns]);
+			$view = $this->injector->get($type, ['try' => $this->ns]);
 		}
 		// set the content type in the response (but don't override it)
 		$response->setHeader('content type', $view->getContentType(), false);

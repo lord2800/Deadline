@@ -11,10 +11,7 @@ class Hello implements IController {
 	function index() {
 		$name = $this->request->getInput('name', 'string');
 		if(empty($name)) $name = 'Jeff';
-		$response           = new Response(['name' => $name]);
-		$response->template = 'hello.tal';
-
-		return $response;
+		return new Response(['name' => $name, 'template' => 'hello.tal', 'lang' => $this->request->cookieInput('lang', 'string')]);
 	}
 	function getIndex() { return $this->index(); }
 }

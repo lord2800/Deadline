@@ -4,14 +4,15 @@ namespace Deadline\Factory;
 use Psr\Log\LoggerInterface;
 
 use Deadline\App,
+	Deadline\Injector,
 	Deadline\IStorage;
 
 class CacheFactory {
-	private $logger, $instancefactory, $store;
+	private $logger, $injector, $store;
 
-	public function __construct(LoggerInterface $logger, InstanceFactory $instancefactory, IStorage $store) {
+	public function __construct(LoggerInterface $logger, Injector $injector, IStorage $store) {
 		$this->logger = $logger;
-		$this->instancefactory = $instancefactory;
+		$this->injector = $injector;
 		$this->store = $store;
 	}
 
@@ -20,7 +21,7 @@ class CacheFactory {
 		$type = $this->store->get('cache', 'apc');
 		$class = ucfirst($type);
 
-		$instance = $this->instancefactory->get($class, ['try' => 'Deadline\\Cache']);
+		$instance = $this->injector->get($class, ['try' => 'Deadline\\Cache']);
 
 		App::$monitor->snapshot('Cache initialized');
 		return $instance;

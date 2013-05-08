@@ -61,7 +61,7 @@ class MagicRouter extends Router {
 				$params = $routable->getParameters();
 				for($i = 0, $len = count($params); $i < $len; $i++) {
 					$parameter = $params[$i];
-					$order[$parameter->getName()] = $i;
+					$order[$parameter->getName()] = $parameter->getPosition();
 					if($parameter->isOptional()) $optional[] = ['name' => $parameter->getName(), 'default' => $parameter->getDefaultValue()];
 					else $required[] = ['name' => $parameter->getName()];
 				}

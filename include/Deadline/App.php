@@ -1,8 +1,6 @@
 <?php
 namespace Deadline;
 
-use Deadline\Factory\InstanceFactory;
-
 use Analog\Analog,
 	Analog\Logger,
 	Analog\Handler\File,
@@ -36,7 +34,7 @@ class App {
 	public final function live() { return $this->store->get('live', false); }
 	public function bootstrap() {}
 	public function getBaseUrl() {
-		$request = $this->instancefactory->get('Request');
+		$request = $this->injector->get('Request');
 		$ssl = $request->serverInput('https', 'string') === 'on';
 		$port = $request->getHeader('server port');
 		$url = 'http';
@@ -55,7 +53,7 @@ class App {
 			  $modelfactory,
 			  $viewfactory,
 			  $controllerfactory,
-			  $instancefactory,
+			  $injector,
 			  $routerfactory,
 			  $translatorfactory;
 
@@ -101,58 +99,58 @@ class App {
 		ProjectStreamWrapper::init($config['project_name']);
 
 		$app->logger->debug('Creating instance factory');
-		$app->instancefactory = new InstanceFactory();
-		static::$monitor->snapshot('Instance factory created');
-		$app->instancefactory->addDependent('app', $app);
-		$app->instancefactory->addDependent('instancefactory', $app->instancefactory);
-		$app->instancefactory->addDependent('logger', $app->logger);
+		$app->injector = new Injector();
+		static::$monitor->snapshot('Dependency injector created');
+		$app->injector->provide('app', $app);
+		$app->injector->provide('injector', $app->injector);
+		$app->injector->provide('logger', $app->logger);
 
 		$app->logger->debug('Creating storage factory');
-		$app->storefactory = $app->instancefactory->get('StorageFactory', ['try' => 'Deadline\\Factory']);
+		$app->storefactory = $app->injector->get('StorageFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Storage factory created');
 		$app->store = $app->storefactory->get($config);
-		$app->instancefactory->addDependent('store', $app->store);
+		$app->injector->provide('store', $app->store);
 
 		$app->logger->debug('Creating request');
-		$request = $app->instancefactory->get('Request');
+		$request = $app->injector->get('Request');
 		static::$monitor->snapshot('Request created');
-		$app->instancefactory->addDependent('request', $request);
+		$app->injector->provide('request', $request);
 
 		$app->logger->debug('Creating cache factory');
-		$app->cachefactory = $app->instancefactory->get('CacheFactory', ['try' => 'Deadline\\Factory']);
+		$app->cachefactory = $app->injector->get('CacheFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Cache factory created');
-		$app->instancefactory->addDependent('cache', $app->cachefactory->get());
+		$app->injector->provide('cache', $app->cachefactory->get());
 
 		$app->logger->debug('Creating translator factory');
-		$app->translatorfactory = $app->instancefactory->get('TranslatorFactory', ['try' => 'Deadline\\Factory']);
+		$app->translatorfactory = $app->injector->get('TranslatorFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Translator factory created');
-		$app->instancefactory->addDependent('translatorfactory', $app->translatorfactory);
-		$app->instancefactory->addDependent('translator', $app->translatorfactory->get());
+		$app->injector->provide('translatorfactory', $app->translatorfactory);
+		$app->injector->provide('translator', $app->translatorfactory->get());
 
 		$app->logger->debug('Creating model factory');
-		$app->modelfactory = $app->instancefactory->get('ModelFactory', ['try' => 'Deadline\\Factory']);
+		$app->modelfactory = $app->injector->get('ModelFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Model factory created');
-		$app->instancefactory->addDependent('modelfactory', $app->modelfactory);
+		$app->injector->provide('modelfactory', $app->modelfactory);
 
 		$app->logger->debug('Creating view factory');
-		$app->viewfactory = $app->instancefactory->get('ViewFactory', ['try' => 'Deadline\\Factory']);
+		$app->viewfactory = $app->injector->get('ViewFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('View factory created');
-		$app->instancefactory->addDependent('viewfactory', $app->viewfactory);
+		$app->injector->provide('viewfactory', $app->viewfactory);
 
 		$app->logger->debug('Creating controller factory');
-		$app->controllerfactory = $app->instancefactory->get('ControllerFactory', ['try' => 'Deadline\\Factory']);
+		$app->controllerfactory = $app->injector->get('ControllerFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Controller factory created');
-		$app->instancefactory->addDependent('controllerfactory', $app->controllerfactory);
+		$app->injector->provide('controllerfactory', $app->controllerfactory);
 
 		$app->logger->debug('Creating router factory');
-		$app->routerfactory = $app->instancefactory->get('RouterFactory', ['try' => 'Deadline\\Factory']);
+		$app->routerfactory = $app->injector->get('RouterFactory', ['try' => 'Deadline\\Factory']);
 		static::$monitor->snapshot('Router factory created');
-		$app->instancefactory->addDependent('routerfactory', $app->routerfactory);
+		$app->injector->provide('routerfactory', $app->routerfactory);
 
 		$app->logger->debug('We are in ' . $app->mode() . ' mode');
 
 		$app->logger->debug('Setting up exception handler');
-		$template = $app->instancefactory->get('UnhandledExceptionTemplate');
+		$template = $app->injector->get('UnhandledExceptionTemplate');
 
 		$handler = new ExceptionHandler(!$app->live(), $template);
 		$handler->register();
@@ -169,7 +167,7 @@ class App {
 		$router = $this->routerfactory->get();
 		$router->loadRoutes();
 
-		$request = $this->instancefactory->get('Request');
+		$request = $this->injector->get('Request');
 		$this->logger->debug('Finding route for ' . $request->path);
 		$route = $router->route($request);
 		if($route === null) {
@@ -225,7 +223,7 @@ class App {
 		if(empty($locale)) {
 			$this->logger->debug('Locale not found in a cookie, inferring from Accept-Language header');
 			// nope, infer it from Accept-Language
-			$parser = $this->instancefactory->get('QualityParser');
+			$parser = $this->injector->get('QualityParser');
 			$locale = str_replace('-', '_', $parser->bestQuality($request->getHeader('Accept-Language')));
 			$this->logger->debug('Determined locale: ' . $locale);
 			$response->setHeader('Content-Language', $locale);

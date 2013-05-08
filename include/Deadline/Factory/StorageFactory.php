@@ -3,14 +3,15 @@ namespace Deadline\Factory;
 
 use Psr\Log\LoggerInterface;
 
-use Deadline\App;
+use Deadline\App,
+	Deadline\Injector;
 
 class StorageFactory {
-	private $logger, $instancefactory;
+	private $logger, $injector;
 
-	public function __construct(LoggerInterface $logger, InstanceFactory $instancefactory) {
+	public function __construct(LoggerInterface $logger, Injector $injector) {
 		$this->logger = $logger;
-		$this->instancefactory = $instancefactory;
+		$this->injector = $injector;
 	}
 
 	public function get(array $config) {
@@ -18,7 +19,7 @@ class StorageFactory {
 		$type = pathinfo($config['settings'], PATHINFO_EXTENSION);
 		$class = ucfirst($type);
 
-		$instance = $this->instancefactory->get($class, ['try' => 'Deadline\\Storage']);
+		$instance = $this->injector->get($class, ['try' => 'Deadline\\Storage']);
 		$instance->load($config);
 
 		App::$monitor->snapshot('Storage initialized');

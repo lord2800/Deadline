@@ -11,18 +11,19 @@ use Psr\Log\LoggerInterface;
 
 use Deadline\App,
 	Deadline\IStorage,
+	Deadline\Injector,
 	Deadline\RouteMatch,
 	Deadline\ProjectStreamWrapper,
 	Deadline\DeadlineStreamWrapper;
 
 class ControllerFactory {
-	private $ns, $instancefactory, $logger, $store;
+	private $ns, $injector, $logger, $store;
 
-	public function __construct(LoggerInterface $logger, IStorage $store, InstanceFactory $instancefactory) {
+	public function __construct(LoggerInterface $logger, IStorage $store, Injector $injector) {
 		$this->ns              = $store->get('controller_namespace', 'Deadline\\Controller');
 		$this->logger          = $logger;
 		$this->store           = $store;
-		$this->instancefactory = $instancefactory;
+		$this->injector = $injector;
 	}
 
 	private function getNamespaceFromFile($file) {
@@ -85,7 +86,7 @@ class ControllerFactory {
 	}
 
 	public function get(RouteMatch $route) {
-		$instance = $this->instancefactory->get($route->route->controller, ['try' => $this->ns]);
+		$instance = $this->injector->get($route->route->controller, ['try' => $this->ns]);
 
 		App::$monitor->snapshot('Controller initialized');
 		return $instance;

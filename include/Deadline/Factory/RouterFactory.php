@@ -2,17 +2,18 @@
 namespace Deadline\Factory;
 
 use Deadline\App,
+	Deadline\Injector,
 	Deadline\IStorage;
 
 class RouterFactory {
-	private $instancefactory;
-	public function __construct(InstanceFactory $instancefactory, IStorage $store) {
-		$this->instancefactory = $instancefactory;
+	private $injector;
+	public function __construct(Injector $injector, IStorage $store) {
+		$this->injector = $injector;
 		$this->storage = $store;
 	}
 	public function get() {
 		$routerType = ucfirst($this->storage->get('router', 'magic')) . 'Router';
-		$router = $this->instancefactory->get($routerType, ['try' => 'Deadline\\Router']);
+		$router = $this->injector->get($routerType, ['try' => 'Deadline\\Router']);
 
 		App::$monitor->snapshot('Router initialized');
 		return $router;

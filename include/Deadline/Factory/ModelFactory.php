@@ -1,23 +1,21 @@
 <?php
 namespace Deadline\Factory;
 
-use \RedBean_Facade as R;
-use \PDO;
-
 use Psr\Log\LoggerInterface;
 
 use Deadline\App,
+	Deadline\Injector,
 	Deadline\IStorage;
 
 class ModelFactory {
-	private $ns, $instancefactory, $logger, $store;
+	private $ns, $injector, $logger, $store;
 
-	public function __construct(App $app, LoggerInterface $logger, IStorage $store, InstanceFactory $instancefactory) {
+	public function __construct(App $app, LoggerInterface $logger, IStorage $store, Injector $injector) {
 		$this->logger = $logger;
 		$this->logger->debug('Initializing model');
 
 		$this->ns = $store->get('model_namespace', 'Deadline\\Model\\');
-		$this->instancefactory = $instancefactory;
+		$this->injector = $injector;
 		$this->store = $store;
 
 		App::$monitor->snapshot('Model initialized');
@@ -25,7 +23,7 @@ class ModelFactory {
 
 	public function get($name) {
 		$this->logger->debug('Loading model ' . $name);
-		$type = $this->instancefactory->get($name, ['try' => $this->ns]);
+		$type = $this->injector->get($name, ['try' => $this->ns]);
 
 		return $type;
 	}
