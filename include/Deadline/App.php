@@ -175,6 +175,7 @@ class App {
 		}
 		$this->logger->debug('Getting controller for route');
 		$controller = $this->controllerfactory->get($route);
+		$container = new Security($controller, new Acl());
 		$response   = null;
 		static::$monitor->snapshot('Route determined');
 
@@ -186,7 +187,7 @@ class App {
 		}
 		if(method_exists($controller, $route->method)) {
 			$this->logger->debug('Calling routed method ' . $route->method);
-			$response = call_user_func_array([$controller, $route->method], $args);
+			$response = call_user_func_array([$container, $route->method], $args);
 			static::$monitor->snapshot('Controller route finished');
 		} else {
 			throw new HttpNotFound('No handler for ' . $route->controller . '->' . $route->method);

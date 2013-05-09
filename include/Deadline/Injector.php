@@ -28,7 +28,9 @@ class Injector {
 
 	private function getProvider($name) {
 		// the class cache is more robust, so check it first
-		return isset($this->classcache[$name])) ? $this->classcache[$name] : isset($this->namecache[$name])) ? $this->namecache[$name] : null;
+		if(isset($this->classcache[$name])) return $this->classcache[$name];
+		if(isset($this->namecache[$name])) return $this->namecache[$name];
+		return null;
 	}
 
 	/**
