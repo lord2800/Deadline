@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "718e1574b425870e85043061feee182d",
+    "hash": "f284d4d41f40986d9548433ff866a25b",
     "packages": [
         {
             "name": "analog/analog",
@@ -11,12 +11,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jbroadway/analog.git",
-                "reference": "1.0.2-stable"
+                "reference": "265619ea13fef62ad8e713067a4267b161b279fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jbroadway/analog/zipball/1.0.2-stable",
-                "reference": "1.0.2-stable",
+                "url": "https://api.github.com/repos/jbroadway/analog/zipball/265619ea13fef62ad8e713067a4267b161b279fb",
+                "reference": "265619ea13fef62ad8e713067a4267b161b279fb",
                 "shasum": ""
             },
             "require": {
@@ -52,7 +52,7 @@
                 "logging",
                 "syslog"
             ],
-            "time": "2013-03-01 15:39:04"
+            "time": "2013-04-22 15:14:57"
         },
         {
             "name": "bitworking/mimeparse",
@@ -109,12 +109,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/cartalyst/sentry.git",
-                "reference": "992880f0baa0391804f560308774cf1a3c46bf4d"
+                "reference": "e1393a964987562706b0bb56fb07529a0d9591ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cartalyst/sentry/zipball/992880f0baa0391804f560308774cf1a3c46bf4d",
-                "reference": "992880f0baa0391804f560308774cf1a3c46bf4d",
+                "url": "https://api.github.com/repos/cartalyst/sentry/zipball/e1393a964987562706b0bb56fb07529a0d9591ff",
+                "reference": "e1393a964987562706b0bb56fb07529a0d9591ff",
                 "shasum": ""
             },
             "require": {
@@ -200,7 +200,7 @@
                 "laravel",
                 "security"
             ],
-            "time": "2013-04-20 02:52:52"
+            "time": "2013-05-03 19:45:03"
         },
         {
             "name": "gabordemooij/redbean",
@@ -294,17 +294,207 @@
             "time": "2013-01-08 17:19:00"
         },
         {
+            "name": "illuminate/container",
+            "version": "dev-master",
+            "target-dir": "Illuminate/Container",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/illuminate/container.git",
+                "reference": "1b6435854c4ee0571510816cc3bda5bce39249e5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/illuminate/container/zipball/1b6435854c4ee0571510816cc3bda5bce39249e5",
+                "reference": "1b6435854c4ee0571510816cc3bda5bce39249e5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Illuminate\\Container": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylorotwell@gmail.com"
+                }
+            ],
+            "time": "2013-04-30 20:01:45"
+        },
+        {
+            "name": "illuminate/database",
+            "version": "dev-master",
+            "target-dir": "Illuminate/Database",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/illuminate/database.git",
+                "reference": "b41bfad7715027eba6e746aa3039826e16b92254"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/b41bfad7715027eba6e746aa3039826e16b92254",
+                "reference": "b41bfad7715027eba6e746aa3039826e16b92254",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/container": "4.0.x",
+                "illuminate/events": "4.0.x",
+                "illuminate/support": "4.0.x",
+                "nesbot/carbon": "1.*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "illuminate/console": "4.0.x",
+                "illuminate/filesystem": "4.0.x",
+                "illuminate/pagination": "4.0.x",
+                "illuminate/support": "4.0.x",
+                "mockery/mockery": "0.7.2",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Illuminate\\Database": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylorotwell@gmail.com"
+                }
+            ],
+            "description": "An elegant database abstraction library.",
+            "keywords": [
+                "database",
+                "laravel",
+                "orm",
+                "sql"
+            ],
+            "time": "2013-05-09 01:02:05"
+        },
+        {
+            "name": "illuminate/events",
+            "version": "dev-master",
+            "target-dir": "Illuminate/Events",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/illuminate/events.git",
+                "reference": "6ea4f171da9b5b302834276ed6c9b1229ca85522"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/illuminate/events/zipball/6ea4f171da9b5b302834276ed6c9b1229ca85522",
+                "reference": "6ea4f171da9b5b302834276ed6c9b1229ca85522",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/container": "4.0.x",
+                "illuminate/support": "4.0.x",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.7.2",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Illuminate\\Events": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylorotwell@gmail.com"
+                }
+            ],
+            "description": "A simple, powerful events system.",
+            "time": "2013-05-02 16:43:30"
+        },
+        {
+            "name": "illuminate/support",
+            "version": "dev-master",
+            "target-dir": "Illuminate/Support",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/illuminate/support.git",
+                "reference": "ae598ed1e33c734ed9beeb4ffd13b8f39c403b01"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/ae598ed1e33c734ed9beeb4ffd13b8f39c403b01",
+                "reference": "ae598ed1e33c734ed9beeb4ffd13b8f39c403b01",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "0.7.2",
+                "patchwork/utf8": "1.1.*",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Illuminate\\Support": ""
+                },
+                "files": [
+                    "Illuminate/Support/helpers.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylorotwell@gmail.com"
+                }
+            ],
+            "description": "Various utilities and support functions.",
+            "time": "2013-05-10 04:38:58"
+        },
+        {
             "name": "ircmaxell/password-compat",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ircmaxell/password_compat.git",
-                "reference": "733c06c599bfeb511f54253ddb127701bce0917d"
+                "reference": "6925da603b31bfff9488480c0a9db48a0feeadf1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ircmaxell/password_compat/zipball/733c06c599bfeb511f54253ddb127701bce0917d",
-                "reference": "733c06c599bfeb511f54253ddb127701bce0917d",
+                "url": "https://api.github.com/repos/ircmaxell/password_compat/zipball/6925da603b31bfff9488480c0a9db48a0feeadf1",
+                "reference": "6925da603b31bfff9488480c0a9db48a0feeadf1",
                 "shasum": ""
             },
             "type": "library",
@@ -330,7 +520,50 @@
                 "hashing",
                 "password"
             ],
-            "time": "2013-02-13 16:58:34"
+            "time": "2013-05-10 11:19:13"
+        },
+        {
+            "name": "nesbot/carbon",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "git://github.com/briannesbitt/Carbon.git",
+                "reference": "1.2.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/briannesbitt/Carbon/zipball/1.2.0",
+                "reference": "1.2.0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Carbon": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brian Nesbitt",
+                    "email": "brian@nesbot.com",
+                    "homepage": "http://nesbot.com"
+                }
+            ],
+            "description": "A simple API extension for DateTime.",
+            "homepage": "https://github.com/briannesbitt/Carbon",
+            "keywords": [
+                "date",
+                "datetime",
+                "time"
+            ],
+            "time": "2012-10-14 17:41:18"
         },
         {
             "name": "phptal/phptal",
@@ -473,8 +706,12 @@
         "analog/analog": 20,
         "phptal/phptal": 20,
         "cartalyst/sentry": 20,
-        "tga/exception-gui": 20,
-        "ircmaxell/password-compat": 20
+        "illuminate/database": 20,
+        "illuminate/events": 20,
+        "illuminate/support": 20,
+        "illuminate/container": 20,
+        "ircmaxell/password-compat": 20,
+        "tga/exception-gui": 20
     },
     "platform": {
         "php": ">=5.4"

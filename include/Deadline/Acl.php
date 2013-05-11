@@ -1,7 +1,7 @@
 <?php
 namespace Deadline;
 
-class Acl {
+abstract class Acl {
 	public function hasPermission($call) {
 		return false;
 	}

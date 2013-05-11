@@ -8,9 +8,13 @@
 		"bitworking/mimeparse":"2.0.*",
 		"gabordemooij/redbean":"v3.3.6",
 		"cartalyst/sentry":"2.0.*@dev",
+		"illuminate/database":"4.0.*@dev",
+		"illuminate/events":"4.0.*@dev",
+		"illuminate/support":"4.0.*@dev",
+		"illuminate/container":"4.0.*@dev",
+		"ircmaxell/password-compat":"master@dev",
 		"havvg/http-exception":"v1.0.1",
-		"tga/exception-gui":"master@dev",
-		"ircmaxell/password-compat":"master@dev"
+		"tga/exception-gui":"master@dev"
 	},
 	"autoload":{
 		"psr-0":{

@@ -48,6 +48,7 @@ class App {
 
 	protected $store,
 			  $logger,
+			  $acl,
 			  $storefactory,
 			  $cachefactory,
 			  $modelfactory,
@@ -147,6 +148,10 @@ class App {
 		static::$monitor->snapshot('Router factory created');
 		$app->injector->provide('routerfactory', $app->routerfactory);
 
+		// TODO AclFactory (do I really need it? my gut says no)
+		$app->acl = $app->injector->get('SentryAcl', ['try' => 'Deadline\\Acl']);
+		$app->injector->provide('acl', $app->acl);
+
 		$app->logger->debug('We are in ' . $app->mode() . ' mode');
 
 		$app->logger->debug('Setting up exception handler');
@@ -175,7 +180,8 @@ class App {
 		}
 		$this->logger->debug('Getting controller for route');
 		$controller = $this->controllerfactory->get($route);
-		$container = new Security($controller, new Acl());
+		// don't need the injector for Security, because we're going to manually pass it the params it wants
+		$container = new Security($controller, $this->acl);
 		$response   = null;
 		static::$monitor->snapshot('Route determined');
 

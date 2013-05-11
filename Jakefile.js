@@ -147,7 +147,7 @@ namespace('minify', function () {
 	});
 });
 
-task('watch', [], function () {
+/*task('watch', [], function () {
 	watch.watchTree(__dirname, {ignoreDotFiles: true}, function (f, curr, prev) {
 		if (typeof f == "object" && prev === null && curr === null) {
 			// Finished walking the tree
@@ -158,15 +158,15 @@ task('watch', [], function () {
 		} else {
 			// f was changed
 		}
-});
+});*/
 
 /* Declarations--these are hoisted to the top, but it's ugly like that */
 
 var path = require('path'),
 	fs = require('fs'),
 	jsminify = require('uglify-js').minify,
-	cssminify = require('clean-css').process,
-	watch = require('watch');
+	cssminify = require('clean-css').process/*,
+	watch = require('watch')*/;
 
 var execOpts = {printStdout: !jake.program.opts.quiet, printStderr: !jake.program.opts.quiet, breakOnError: false};
 
