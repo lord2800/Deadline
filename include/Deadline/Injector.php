@@ -32,6 +32,14 @@ class Injector {
 		if(isset($this->namecache[$name])) return $this->namecache[$name];
 		return null;
 	}
+	private function getFullyQualifiedClassName($class, $options) {
+		$fqn = $class;
+		if(!class_exists($fqn)) $fqn = $options['try'] . '\\' . $class;
+		if(!class_exists($fqn)) $fqn = $options['fallback']  . '\\' . $class;
+		if(!class_exists($fqn)) throw new RuntimeException(sprintf('Class %1$s not found, tried namespaces: %1$s, %2$s\\%1$s, %3$s\\%1$s',
+			$class, $options['try'], $options['fallback']));
+		return $fqn;
+	}
 
 	/**
 	 * Get an instance of the specified class, with the specified options
@@ -43,6 +51,8 @@ class Injector {
 	 * @return mixed
 	 */
 	public function get($class, array $options = []) {
+		$options = array_merge(['try' => 'Deadline', 'fallback' => 'Deadline'], $options);
+		$class = $this->getFullyQualifiedClassName($class, $options);
 		if(!isset($this->instances[$class])) {
 			$instance = $this->create($class, $options);
 			$this->instances[$class] = $instance;
@@ -61,13 +71,8 @@ class Injector {
 	 */
 	public function create($class, array $options = []) {
 		$options = array_merge(['try' => 'Deadline', 'fallback' => 'Deadline'], $options);
-		$fqn = $class;
 		$instance = null;
-
-		if(!class_exists($fqn)) $fqn = $options['try'] . '\\' . $class;
-		if(!class_exists($fqn)) $fqn = $options['fallback']  . '\\' . $class;
-		if(!class_exists($fqn)) throw new RuntimeException(sprintf('Class %1$s not found, tried namespaces: %1$s, %2$s\\%1$s, %3$s\\%1$s',
-			$class, $options['try'], $options['fallback']));
+		$fqn = $this->getFullyQualifiedClassName($class, $options);
 
 		$ref = new ReflectionClass($fqn);
 		$ctor = $ref->getConstructor();

@@ -48,19 +48,19 @@ class SentryAcl extends Acl {
 			try {
 				$anonymous = $this->sentry->getUserProvider()->findByLogin('anonymous@example.com');
 			} catch(UserNotFoundException $e) {
+				$permissions = $store->get('anonymousPermissions', []);
 				$anonymous = $this->sentry->register([
 					'email' => 'anonymous@example.com',
 					'password' => password_hash($this->randomPassword(), PASSWORD_DEFAULT),
-					'permissions' => $store->get('anonymousPermissions', [])
+					'permissions' => $permissions
 				], true);
 			}
 
 			$this->sentry->login($anonymous, false);
 		}
 	}
-	public function hasPermission($call) {
-		return $this->sentry->getUser()->hasAccess($call);
-	}
+	public function hasPermission($call) { return $this->sentry->getUser()->hasAccess($call); }
+	public function getUser() { return $this->sentry->getUser(); }
 	public function login($credentials) {
 		try {
 			return $this->sentry->authenticateAndRemember($credentials);
