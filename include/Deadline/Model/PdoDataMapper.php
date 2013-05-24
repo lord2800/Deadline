@@ -100,9 +100,9 @@ abstract class PdoDataMapper implements IDataMapper {
 		}
 		return $object;
 	}
-	public final function destroy(Serializable $object) {
+	public final function destroy($object) {
 		$table = $this->mung(get_class($object));
-		$id = $object->serialize()['id'];
+		$id = $object->id;
 		return $this->query('DELETE FROM ' . $table . ' WHERE id = ? LIMIT 1;', [$id]);
 	}
 

@@ -7,7 +7,7 @@ use \Serializable,
 interface IDataMapper {
 	function __construct(App $app, IStorage $store, LoggerInterface $logger);
 	function transaction(callable $code);
-	function persist(Serializable $object);
-	function destroy(Serializable $object);
+	function persist($object);
+	function destroy($object);
 	function findByKey($model, $key, $value, array $options);
 }

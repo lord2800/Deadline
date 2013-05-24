@@ -47,10 +47,15 @@ class MongoDataMapper implements IDataMapper {
 		$callable();
 	}
 
-	public final function persist(Serializable $object) {
+	public final function persist($object) {
 		$class = get_class($object);
 		$collection = $this->db->$class;
-		$serialized = $object->serialize();
+		$vars = get_class_vars($object);
+		$serialized = [];
+		foreach($vars as $name => $default) {
+			$serialized[$name] = $object->$name;
+		}
+
 		if(isset($serialized['_id'])) {
 			$serialized['_id'] = new MongoId($serialized['_id']);
 		}
@@ -59,7 +64,7 @@ class MongoDataMapper implements IDataMapper {
 	public final function destroy(Serializable $object) {
 		$class = get_class($class);
 		$collection = $this->db->$class;
-		$id = $object->serialize()['_id'];
+		$id = $object->_id;
 		return $collection->remove(['_id' => new MongoId($id)], ['justOne' => true]);
 	}
 
