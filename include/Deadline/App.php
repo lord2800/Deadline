@@ -173,7 +173,7 @@ class App {
 		$router->loadRoutes();
 
 		$request = $this->injector->get('Request');
-		$this->logger->debug('Finding route for ' . $request->path);
+		$this->logger->debug('Finding route for ' . $request->verb . ' ' . $request->path);
 		$route = $router->route($request);
 		if($route === null) {
 			throw new HttpNotFound('No route for ' . $request->path);
@@ -182,7 +182,7 @@ class App {
 		$controller = $this->controllerfactory->get($route);
 		// don't need the injector for Security, because we're going to manually pass it the params it wants
 		$container = new Security($controller, $this->acl);
-		$response   = null;
+		$response = null;
 		static::$monitor->snapshot('Route determined');
 
 		list($route, $args) = [$route->route, $route->args];

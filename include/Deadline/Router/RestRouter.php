@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Deadline\App,
 	Deadline\Route,
 	Deadline\Router,
+	Deadline\RouteMatch,
 	Deadline\ICache,
 	Deadline\Request,
 	Deadline\Factory\ControllerFactory;
@@ -34,11 +35,14 @@ class RestRouter extends Router {
 		$this->loadRoutes();
 	}
 	public function route(Request $request) {
-		$route = parent::route($request);
-		if($route !== null) {
-			if(strtolower($request->verb) !== strtolower($route->route->verb)) return null;
+		$uri = $request->path;
+		foreach($this->routes as $route) {
+			$match = $route->match($uri);
+			if($match !== false && strtolower($request->verb) === strtolower($route->verb)) {
+				return new RouteMatch($route, $match);
+			}
 		}
-		return $route;
+		return null;
 	}
 
 	public function loadRoutes() {

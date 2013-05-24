@@ -8,7 +8,7 @@ use Deadline\App;
 use Psr\Log\LoggerInterface;
 
 abstract class Router {
-	private $routes = [];
+	protected $routes = [];
 
 	public function route(Request $request) {
 		$uri = $request->path;

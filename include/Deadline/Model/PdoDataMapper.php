@@ -120,6 +120,16 @@ abstract class PdoDataMapper implements IDataMapper {
 	protected final function findById($model, $id, array $projection = []) {
 		return $this->findByKey($model, 'id', $id, ['limit' => 1, 'projection' => $projection]);
 	}
+	protected final function findAll($model, array $options = []) {
+		$options = array_merge($options, [
+			'limit' => 0,
+			'projection' => []
+		]);
+		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
+		$projection = $options['projection'];
+		$projection = empty($projection) ? '*' : '`' . implode('`,`', $projection) . '`';
+		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($model) . $limit . ';');
+	}
 	protected final function query($sql, array $params, $model = '') {
 		$this->logger->debug('Running SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
