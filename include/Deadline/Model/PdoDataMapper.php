@@ -52,11 +52,16 @@ abstract class PdoDataMapper implements IDataMapper {
 	/* 
 	 * NB: this function is limited; it assumes your table has an id field that is unique, and does not
 	 * handle composite keys in any way whatsoever, nor does it attempt to handle foreign keys--you must
-	 * pre-process that info in the serialize method
+	 * pre-process that info elsewhere before persisting, and it assumes you want to persist all public
+	 * properties on your object.
 	 */
-	public final function persist(Serializable $object) {
+	public final function persist($object) {
 		$table = $this->mung(get_class($object));
-		$data = $object->serialize();
+		$vars = get_class_vars($object);
+		$data = [];
+		foreach($vars as $name => $default) {
+			$data[$name] = $object->$name;
+		}
 		$keys = array_keys($data);
 		foreach($keys as &$key) {
 			$key = $this->mung($key);
@@ -76,7 +81,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
-			$query->bindParam($name, $value, static::$typemap[gettype($value)]);
+			$query->bindParam($this->mung($name), $value, static::$typemap[gettype($value)]);
 		}
 		$query->execute($data);
 		if($isNew) {
