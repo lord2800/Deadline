@@ -49,6 +49,17 @@ abstract class PdoDataMapper implements IDataMapper {
 		$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
 
+	public function transaction(callable $callable) {
+		$this->db->beginTransaction();
+		try {
+			$callable();
+		} catch(Exception $e) {
+			$this->db->rollback();
+			throw new RuntimeException('Transaction threw an exception, changes not committed', 0, $e);
+		}
+		$this->db->commit();
+	}
+
 	/* 
 	 * NB: this function is limited; it assumes your table has an id field that is unique, and does not
 	 * handle composite keys in any way whatsoever, nor does it attempt to handle foreign keys--you must

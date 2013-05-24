@@ -42,6 +42,11 @@ class MongoDataMapper implements IDataMapper {
 		$this->db = $this->client->{$settings['db']};
 	}
 
+	public function transaction(callable $callable) {
+		// MongoDB does not support transactions
+		$callable();
+	}
+
 	public final function persist(Serializable $object) {
 		$class = get_class($object);
 		$collection = $this->db->$class;
