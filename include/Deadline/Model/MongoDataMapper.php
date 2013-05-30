@@ -3,8 +3,7 @@ namespace Deadline\Model;
 
 use Psr\Log\LoggerInterface;
 
-use Deadline\App,
-	Deadline\IStorage,
+use Deadline\DatabaseHandle,
 	Deadline\IDataMapper;
 
 use \MongoClient,
@@ -14,31 +13,15 @@ use \MongoClient,
 	\ReflectionProperty as RP;
 
 class MongoDataMapper implements IDataMapper {
-	private $client, $store, $mode, $logger;
+	private $client, $dbh, $logger;
 
-	public function __construct(App $app, IStorage $store, LoggerInterface $logger) {
-		$this->store = $store;
-		$this->mode = $app->mode();
+	public function __construct(DatabaseHandle $dbh, LoggerInterface $logger) {
+		$this->dbh = $dbh;
+		$this->logger = $logger;
 	}
 
-	public function connect($key = 'connection_settings') {
-		$default = [
-			'production' => [
-				'dsn' => 'mongodb://' . MongoClient::DEFAULT_HOST . ':' . MongoClient::DEFAULT_PORT,
-				'username' => '', 'password' => '', 'db' => ''
-			],
-			'debug' => [
-				'dsn' => 'mongodb://' . MongoClient::DEFAULT_HOST . ':' . MongoClient::DEFAULT_PORT,
-				'username' => '', 'password' => '', 'db' => ''
-			]
-		];
-		$settings = $this->store->get($key, $default)[$this->mode];
-
-		$this->client = new MongoClient($settings['dsn'], [
-			'db' => $settings['db'],
-			'username' => $settings['username'],
-			'password' => $settings['password']
-		]);
+	public function connect($key = 'primary') {
+		$this->client = $this->dbh->get($key);
 		$this->db = $this->client->{$settings['db']};
 	}
 

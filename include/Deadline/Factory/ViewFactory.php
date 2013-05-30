@@ -59,7 +59,7 @@ class ViewFactory {
 			try {
 				$view = $this->injector->get($type, ['try' => $this->ns]);
 			} catch(\RuntimeException $e) {} // we couldn't find the type, safely ignore it and move on
-		} 
+		}
 		if($view == null) {
 			$type = $this->getViewType($request->getHeader('accept'));
 			$view = $this->injector->get($type, ['try' => $this->ns]);

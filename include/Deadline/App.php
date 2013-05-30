@@ -148,17 +148,22 @@ class App {
 		static::$monitor->snapshot('Router factory created');
 		$app->injector->provide('routerfactory', $app->routerfactory);
 
+		$app->logger->debug('Setting up exception handler');
+		$template = $app->injector->get('UnhandledExceptionTemplate');
+
+		$app->logger->debug('Generating database handles lazily');
+		$dbh = $app->injector->get('DatabaseHandle');
+		static::$monitor->snapshot('Generated database handles');
+		$app->injector->provide('dbh', $dbh);
+
+		$handler = new ExceptionHandler(!$app->live(), $template);
+		$handler->register();
+
 		// TODO AclFactory (do I really need it? my gut says no)
 		$app->acl = $app->injector->get('SentryAcl', ['try' => 'Deadline\\Acl']);
 		$app->injector->provide('acl', $app->acl);
 
 		$app->logger->debug('We are in ' . $app->mode() . ' mode');
-
-		$app->logger->debug('Setting up exception handler');
-		$template = $app->injector->get('UnhandledExceptionTemplate');
-
-		$handler = new ExceptionHandler(!$app->live(), $template);
-		$handler->register();
 
 		$app->bootstrap();
 

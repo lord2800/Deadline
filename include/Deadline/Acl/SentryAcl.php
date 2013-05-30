@@ -1,16 +1,13 @@
 <?php
 namespace Deadline\Acl;
 
-use \PDO;
-
-use Deadline\App,
-	Deadline\Acl,
+use Deadline\Acl,
 	Deadline\IStorage,
-	Deadline\DeadlineStreamWrapper;
+	Deadline\DatabaseHandle;
 
 use Cartalyst\Sentry\Users\Eloquent\Provider as UserProvider,
 	Cartalyst\Sentry\Groups\Eloquent\Provider as GroupProvider,
-	Cartalyst\Sentry\Throttling\Eloquent\Provider as ThrottlingProvider,
+	Cartalyst\Sentry\Throttling\Eloquent\Provider as ThrottleProvider,
 	Cartalyst\Sentry\Facades\Native\Sentry as NativeSentry,
 	Cartalyst\Sentry\Sentry,
 	Cartalyst\Sentry\Hashing\NativeHasher,
@@ -26,20 +23,13 @@ class SentryAcl extends Acl {
 		return substr(str_shuffle(str_repeat($pool, 5)), 0, $length);
 	}
 
-	public function __construct(App $app, IStorage $store) {
-		$default = [
-			'debug'      => ['dsn' => 'mysql:host=127.0.0.1;port=3306;dbname=test', 'user' => 'root', 'pass' => ''],
-			'debug'      => ['dsn' => 'mysql:host=127.0.0.1;port=3306;dbname=test', 'user' => 'root', 'pass' => '']
-		];
-		$settings = $store->get('connection_settings', $default)[$app->mode()];
-
-		$pdo = new PDO($settings['dsn'], $settings['user'], $settings['pass']);
-		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	public function __construct(DatabaseHandle $dbh, IStorage $store) {
+		$pdo = $dbh->get($store->get('acl_database', 'primary'));
 		NativeSentry::setupDatabaseResolver($pdo);
 		$hasher = new NativeHasher();
 		$userProvider = new UserProvider($hasher);
 		$groupProvider = new GroupProvider;
-		$throttleProvider = new ThrottlingProvider($userProvider);
+		$throttleProvider = new ThrottleProvider($userProvider);
 		$session = new NativeSession();
 		$cookie = new NativeCookie();
 		$this->sentry = new Sentry($userProvider, $groupProvider, $throttleProvider, $session, $cookie);

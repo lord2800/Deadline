@@ -52,7 +52,7 @@ class Html extends View {
 			->addPreFilter(new PHPTAL_PreFilter_Compress())
 			->setPostFilter(new PostFilterChain($this->filters))
 			->setTranslator(new KeyValueTranslationService($this->translator))
-			->setTemplate($response->template);
+			->setTemplate($response->getTemplate());
 
 		foreach($response->getParams() as $key => $value) {
 			$phptal->set($key, $value);

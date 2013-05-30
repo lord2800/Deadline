@@ -3,8 +3,7 @@ namespace Deadline\Model;
 
 use Psr\Log\LoggerInterface;
 
-use Deadline\App,
-	Deadline\IStorage,
+use Deadline\DatabaseHandle,
 	Deadline\IDataMapper,
 	Deadline\DeadlineStreamWrapper;
 
@@ -12,7 +11,7 @@ use \PDO,
 	\Serializable;
 
 abstract class PdoDataMapper implements IDataMapper {
-	private $db, $store, $mode, $logger;
+	private $db, $dbh, $logger;
 
 	private static $typemap = [
 		"boolean" => PDO::PARAM_BOOL,
@@ -32,21 +31,13 @@ abstract class PdoDataMapper implements IDataMapper {
 		  FETCH_OBJ   = PDO::FETCH_OBJ,
 		  FETCH_PROPS_LATE = PDO::FETCH_PROPS_LATE;
 
-	public function __construct(App $app, IStorage $store, LoggerInterface $logger) {
-		$this->store = $store;
-		$this->mode = $app->mode();
+	public function __construct(DatabaseHandle $dbh, LoggerInterface $logger) {
+		$this->dbh = $dbh;
 		$this->logger = $logger;
 	}
 
-	public function connect($key = 'connection_settings') {
-		$default = [
-			'production' => ['dsn' => 'sqlite:' . DeadlineStreamWrapper::resolve('deadline://database.db3'), 'user' => null, 'pass' => null],
-			'debug'      => ['dsn' => 'sqlite::memory:', 'user' => null, 'pass' => null]
-		];
-		$settings = $this->store->get($key, $default)[$this->mode];
-
-		$this->db = new PDO($settings['dsn'], $settings['user'], $settings['pass']);
-		$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	public function connect($key = 'primary') {
+		$this->db = $this->dbh->get($key);
 	}
 
 	public function transaction(callable $callable) {
@@ -106,7 +97,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		return $this->query('DELETE FROM ' . $table . ' WHERE id = ? LIMIT 1;', [$id]);
 	}
 
-	public final function findByKey($model, $key, $value, array $options = []) {
+	protected final function findByKey($model, $key, $value, array $options = []) {
 		$options = array_merge($options, [
 			'limit' => 0,
 			'projection' => []
