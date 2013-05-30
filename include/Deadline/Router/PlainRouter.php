@@ -1,6 +1,8 @@
 <?php
 namespace Deadline\Router;
 
+use Deadline\Router;
+
 class PlainRouter extends Router {
 	private $store;
 	public function __construct(IStorage $store) { $this->store = $store; }

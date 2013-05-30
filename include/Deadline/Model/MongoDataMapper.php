@@ -12,7 +12,7 @@ use \MongoClient,
 	\ReflectionClass,
 	\ReflectionProperty as RP;
 
-class MongoDataMapper implements IDataMapper {
+abstract class MongoDataMapper implements IDataMapper {
 	private $client, $dbh, $logger;
 
 	public function __construct(DatabaseHandle $dbh, LoggerInterface $logger) {
@@ -44,7 +44,7 @@ class MongoDataMapper implements IDataMapper {
 		}
 		return $collection->save($serialized);
 	}
-	public final function destroy(Serializable $object) {
+	public final function destroy($object) {
 		$class = get_class($class);
 		$collection = $this->db->$class;
 		$id = $object->_id;
