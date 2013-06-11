@@ -6,6 +6,9 @@ use Psr\Log\LoggerInterface;
 use \RuntimeException,
 	\ReflectionClass;
 
+/**
+ * 
+ */
 class Injector {
 	private $instances = [], $classcache = [], $namecache = [];
 

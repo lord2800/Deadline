@@ -70,7 +70,7 @@ class Dispatcher {
 		App::$monitor->snapshot('Controller finished');
 
 		if($response !== null) {
-			$this->configureDefaultResponseValues($this->request, $response);
+			$this->configureDefaultResponseValues($response);
 			$this->logger->debug('Getting a view for the request');
 			$view = $this->viewfactory->get($this->request, $response);
 
