@@ -95,8 +95,8 @@ class Dispatcher {
 		if(empty($locale)) {
 			$this->logger->debug('Locale not found in a cookie, inferring from Accept-Language header');
 			// nope, infer it from Accept-Language
-			$parser = $this->injector->get('QualityParser');
-			$locale = str_replace('-', '_', $parser->bestQuality($this->request->getHeader('Accept-Language')));
+			//$parser = $this->injector->get('QualityParser');
+			$locale = str_replace('-', '_', QualityParser::bestQuality($this->request->getHeader('Accept-Language')));
 			$this->logger->debug('Determined locale: ' . $locale);
 			$response->setHeader('Content-Language', $locale);
 			$response->setCookie('lang', $locale);

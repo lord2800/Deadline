@@ -2,7 +2,7 @@
 namespace Deadline;
 
 class QualityParser {
-	public function parseQuality($value) {
+	public static function parseQuality($value) {
 		$pieces = explode(',', $value);
 		$values = [];
 		foreach($pieces as $piece) {
@@ -15,8 +15,8 @@ class QualityParser {
 		return $values;
 	}
 
-	public function sortQuality($value) {
-		$parsed = $this->parseQuality($value);
+	public static function sortQuality($value) {
+		$parsed = self::parseQuality($value);
 		uksort($parsed, function ($a, $b) {
 			return $a['quality'] - $b['quality'];
 		});
@@ -24,7 +24,7 @@ class QualityParser {
 		return $parsed;
 	}
 
-	public function bestQuality($value) {
-		return $this->sortQuality($value)[0]['name'];
+	public static function bestQuality($value) {
+		return self::sortQuality($value)[0]['name'];
 	}
 }
