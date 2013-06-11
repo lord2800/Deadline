@@ -1,16 +1,17 @@
 {
 	"live": false,
+	"default_route": "/",
 	"connection_settings": {
 		"debug": {
 			"primary": {
 				"type": "PDO",
-				"arguments": [ "sqlite::memory:" ]
+				"arguments": [ "sqlite:../deadline.sq3" ]
 			}
 		},
 		"production": {
 			"primary": {
 				"type": "PDO",
-				"arguments": [ "sqlite::memory:" ]
+				"arguments": [ "sqlite:../deadline.sq3" ]
 			}
 		}
 	}

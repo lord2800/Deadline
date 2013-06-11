@@ -22,7 +22,7 @@ class Request {
 		'array' => FILTER_CALLBACK
 	];
 
-	protected $body = null;
+	protected $body = null, $rewrittenPath = null;
 
 	protected function input($type, $name, $validate, array $validation, $sanitize, array $sanitization) {
 		$sanitization['flags'] = (isset($sanitization['flags']) ? $sanitization['flags'] : 0) | FILTER_NULL_ON_FAILURE;
@@ -60,11 +60,14 @@ class Request {
 
 	public function __get($name) {
 		switch($name) {
-			case 'path': return parse_url($this->uri, PHP_URL_PATH); break;
+			case 'path': return $this->rewrittenPath ?: parse_url($this->uri, PHP_URL_PATH); break;
 			case 'uri': return $this->serverInput('REQUEST_URI', 'string'); break;
 			case 'verb': return $this->serverInput('REQUEST_METHOD', 'string'); break;
 			case 'rawBody': return $this->body ?: ($this->body = file_get_contents('php://input')); break;
 			case 'jsonBody': return json_decode($this->body); break;
 		}
+	}
+	public function __set($name, $value) {
+		if($name === 'path') { $this->rewrittenPath = $value; }
 	}
 }

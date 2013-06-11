@@ -13,9 +13,6 @@ use Psr\Log\LoggerInterface;
 use ExceptionGUI\ExceptionHandler;
 use PHPBenchmark\Monitor;
 
-use Http\Exception\Client\NotFound as HttpNotFound,
-	Http\Exception\Server\NotImplemented as HttpNotImplemented;
-
 class App {
 	private function __construct() {
 		register_shutdown_function(function ($start) {
@@ -28,7 +25,6 @@ class App {
 		}, microtime(true));
 		register_shutdown_function(function () { echo static::$monitor->output(); });
 	}
-
 
 	public final function mode() { return $this->live() ? 'production' : 'debug'; }
 	public final function live() { return $this->store->get('live', false); }
@@ -46,6 +42,8 @@ class App {
 		return $url;
 	}
 
+	public function getDispatcher() { return $this->dispatcher; }
+
 	protected $store,
 			  $logger,
 			  $acl,
@@ -56,7 +54,8 @@ class App {
 			  $controllerfactory,
 			  $injector,
 			  $routerfactory,
-			  $translatorfactory;
+			  $translatorfactory,
+			  $dispatcher;
 
 	// TODO: move this elsewhere
 	public static $monitor;
@@ -156,12 +155,19 @@ class App {
 		static::$monitor->snapshot('Generated database handles');
 		$app->injector->provide('dbh', $dbh);
 
+		// TODO AclFactory (do I really need it? my gut says no)
+		$app->logger->debug('Creating ACL handler');
+		$app->acl = $app->injector->get('SentryAcl', ['try' => 'Deadline\\Acl']);
+		static::$monitor->snapshot('ACL handler created');
+		$app->injector->provide('acl', $app->acl);
+
+		$app->logger->debug('Creating dispatcher');
+		$app->dispatcher = $app->injector->get('Dispatcher');
+		static::$monitor->snapshot('Dispatcher created');
+		$app->injector->provide('dispatcher', $app->dispatcher);
+
 		$handler = new ExceptionHandler(!$app->live(), $template);
 		$handler->register();
-
-		// TODO AclFactory (do I really need it? my gut says no)
-		$app->acl = $app->injector->get('SentryAcl', ['try' => 'Deadline\\Acl']);
-		$app->injector->provide('acl', $app->acl);
 
 		$app->logger->debug('We are in ' . $app->mode() . ' mode');
 
@@ -170,77 +176,5 @@ class App {
 		static::$monitor->snapshot('App bootstrap complete');
 
 		return $app;
-	}
-
-	public final function serve() {
-		$this->logger->debug('Creating router instance');
-		$router = $this->routerfactory->get();
-		$router->loadRoutes();
-
-		$request = $this->injector->get('Request');
-		$this->logger->debug('Finding route for ' . $request->verb . ' ' . $request->path);
-		$route = $router->route($request);
-		if($route === null) {
-			throw new HttpNotFound('No route for ' . $request->path);
-		}
-		$this->logger->debug('Getting controller for route');
-		$controller = $this->controllerfactory->get($route);
-		// don't need the injector for Security, because we're going to manually pass it the params it wants
-		$container = new Security($controller, $this->acl);
-		$response = null;
-		static::$monitor->snapshot('Route determined');
-
-		list($route, $args) = [$route->route, $route->args];
-		if(method_exists($controller, 'setup')) {
-			$this->logger->debug('Calling controller setup function');
-			$controller->setup($request);
-			static::$monitor->snapshot('Controller setup finished');
-		}
-		if(method_exists($controller, $route->method)) {
-			$this->logger->debug('Calling routed method ' . $route->method);
-			$response = call_user_func_array([$container, $route->method], $args);
-			static::$monitor->snapshot('Controller route finished');
-		} else {
-			throw new HttpNotFound('No handler for ' . $route->controller . '->' . $route->method);
-		}
-		if(method_exists($controller, 'shutdown')) {
-			$this->logger->debug('Calling controller shutdown function');
-			$controller->shutdown($request);
-			static::$monitor->snapshot('Controller shutdown finished');
-		}
-		static::$monitor->snapshot('Controller finished');
-
-		if($response !== null) {
-			$this->configureDefaultResponseValues($request, $response);
-			$this->logger->debug('Getting a view for the request');
-			$view = $this->viewfactory->get($request, $response);
-			static::$monitor->snapshot('View constructed');
-			if($view !== null) {
-				$this->logger->debug('Sending response');
-				$view->render($response);
-				static::$monitor->snapshot('Response rendered');
-			} else {
-				throw new HttpNotImplemented('View does not exist for this request');
-			}
-		} else {
-			throw new HttpNotImplemented('No response available');
-		}
-	}
-
-	private function configureDefaultResponseValues(Request $request, Response $response) {
-		$this->logger->debug('Setting default response values (if nonexistent)');
-		// TODO this seems like the wrong place for language settings
-		// do we have a locale from a cookie?
-		$locale = $request->cookieInput('lang', 'string');
-		if(empty($locale)) {
-			$this->logger->debug('Locale not found in a cookie, inferring from Accept-Language header');
-			// nope, infer it from Accept-Language
-			$parser = $this->injector->get('QualityParser');
-			$locale = str_replace('-', '_', $parser->bestQuality($request->getHeader('Accept-Language')));
-			$this->logger->debug('Determined locale: ' . $locale);
-			$response->setHeader('Content-Language', $locale);
-			$response->setCookie('lang', $locale);
-		}
-		static::$monitor->snapshot('Configured default response values');
 	}
 }
