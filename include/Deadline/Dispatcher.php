@@ -11,11 +11,10 @@ use Http\Exception\Client\NotFound as HttpNotFound,
 	Http\Exception\Server\NotImplemented as HttpNotImplemented;
 
 class Dispatcher {
-	private $routerfactory, $viewfactory, $controllerfactory, $logger, $store, $request, $acl;
-	public function __construct(RouterFactory $routerfactory, ViewFactory $viewfactory, ControllerFactory $controllerfactory,
+	private $routerfactory, $controllerfactory, $logger, $store, $request, $acl;
+	public function __construct(RouterFactory $routerfactory, ControllerFactory $controllerfactory,
 								Request $request, LoggerInterface $logger, IStorage $store, Acl $acl) {
 		$this->routerfactory = $routerfactory;
-		$this->viewfactory = $viewfactory;
 		$this->controllerfactory = $controllerfactory;
 		$this->logger = $logger;
 		$this->store = $store;
@@ -71,20 +70,8 @@ class Dispatcher {
 
 		if($response !== null) {
 			$this->configureDefaultResponseValues($response);
-			$this->logger->debug('Getting a view for the request');
-			$view = $this->viewfactory->get($this->request, $response);
-
-			App::$monitor->snapshot('View constructed');
-			if($view !== null) {
-				$this->logger->debug('Sending response');
-				$view->render($response);
-				App::$monitor->snapshot('Response rendered');
-			} else {
-				throw new HttpNotImplemented('View does not exist for this request');
-			}
-		} else {
-			throw new HttpNotImplemented('No response available');
 		}
+		return $response;
 	}
 
 	private function configureDefaultResponseValues(Response $response) {

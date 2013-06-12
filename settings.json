@@ -1,6 +1,6 @@
 {
 	"live": false,
-	"default_route": "/",
+	"default_route": "/hello/index",
 	"connection_settings": {
 		"debug": {
 			"primary": {

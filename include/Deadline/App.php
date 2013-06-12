@@ -13,6 +13,8 @@ use Psr\Log\LoggerInterface;
 use ExceptionGUI\ExceptionHandler;
 use PHPBenchmark\Monitor;
 
+use Http\Exception\AbstractException as HttpException;
+
 class App {
 	private function __construct() {
 		register_shutdown_function(function ($start) {
@@ -43,6 +45,32 @@ class App {
 	}
 
 	public function getDispatcher() { return $this->dispatcher; }
+	public final function serve() {
+		try {
+			$response = $this->getDispatcher()->dispatch();
+			if($response === null) {
+				throw new HttpNotImplemented('No response available');
+			}
+		} catch(Exception $e) {
+			$status = trim(preg_replace_callback('/([A-Z])/', function ($m) { return ' ' . strtolower($m[1]); }, get_class($e)));
+
+			$response = (new Response(['exception' => $e]))
+						->setTemplate('exception.html')
+						->setHeader('Status', sprintf('%d %s', $e->getStatusCode(), $status));
+		}
+
+		$this->logger->debug('Getting a view for the request');
+		$view = $this->viewfactory->get($this->injector->get('Request'), $response);
+
+		static::$monitor->snapshot('View constructed');
+		if($view !== null) {
+			$this->logger->debug('Sending response');
+			$view->render($response);
+			static::$monitor->snapshot('Response rendered');
+		} else {
+			// ...?
+		}
+	}
 
 	protected $store,
 			  $logger,
