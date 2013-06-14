@@ -50,8 +50,9 @@ class UnhandledExceptionTemplate implements TemplateEngineInterface {
 		$response->lang		 = 'en';
 		$response->setTemplate('exception.tal');
 		$exception = $exceptionParsed->getException();
-		if(method_exists($exception, 'getStatusCode')){
-			$status = trim(preg_replace_callback('/([A-Z])/', function ($m) { return ' ' . strtolower($m[1]); }, get_class($exception)));
+		if(method_exists($exception, 'getStatusCode')) {
+			$class = get_class($exception);
+			$status = trim(preg_replace_callback('/([A-Z])/', function ($m) { return ' ' . ucfirst($m[1]); }, substr(strrchr($class, '\\'), 1)));
 			$status = sprintf('%d %s', $exception->getStatusCode(), $status);
 			$response->setHeader('Status', $status, true, $exception->getStatusCode());
 		}
