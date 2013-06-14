@@ -109,12 +109,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/cartalyst/sentry.git",
-                "reference": "e1393a964987562706b0bb56fb07529a0d9591ff"
+                "reference": "b3d38ea3fa381a47f26d3f4e20012e17e40221ae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cartalyst/sentry/zipball/e1393a964987562706b0bb56fb07529a0d9591ff",
-                "reference": "e1393a964987562706b0bb56fb07529a0d9591ff",
+                "url": "https://api.github.com/repos/cartalyst/sentry/zipball/b3d38ea3fa381a47f26d3f4e20012e17e40221ae",
+                "reference": "b3d38ea3fa381a47f26d3f4e20012e17e40221ae",
                 "shasum": ""
             },
             "require": {
@@ -128,11 +128,8 @@
                 "mockery/mockery": "0.7.2"
             },
             "suggest": {
-                "dhorrigan/capsule": "Capsule is a small utility for managing database connections given to illuminate/database outside of Laravel 4.",
-                "illuminate/cookie": "Sentry provides an Illuminate cookie driver for cookie integration.",
-                "illuminate/database": "Sentry provides Eloquent models for User, Group and Throttle providers.",
-                "illuminate/session": "Sentry provides an Illuminate session driver for storage integration.",
-                "ircmaxell/password-compat": "A forward-compatible PHP 5.5 password package for password_* functions can be used as a hasher (NativeHasher) in Sentry."
+                "illuminate/database": "Default sentry user, group and throttling implementations.",
+                "ircmaxell/password-compat": "Default hashing uses PHP 5.5 password_* functions, with forward-compatible support."
             },
             "type": "library",
             "extra": {
@@ -200,7 +197,7 @@
                 "laravel",
                 "security"
             ],
-            "time": "2013-05-03 19:45:03"
+            "time": "2013-06-07 01:42:51"
         },
         {
             "name": "gabordemooij/redbean",
@@ -300,12 +297,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
-                "reference": "1b6435854c4ee0571510816cc3bda5bce39249e5"
+                "reference": "908a2e4ac315c58317b2197c3f057e94bcbf869a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/container/zipball/1b6435854c4ee0571510816cc3bda5bce39249e5",
-                "reference": "1b6435854c4ee0571510816cc3bda5bce39249e5",
+                "url": "https://api.github.com/repos/illuminate/container/zipball/908a2e4ac315c58317b2197c3f057e94bcbf869a",
+                "reference": "908a2e4ac315c58317b2197c3f057e94bcbf869a",
                 "shasum": ""
             },
             "require": {
@@ -317,7 +314,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -326,115 +323,16 @@
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
             "authors": [
                 {
                     "name": "Taylor Otwell",
                     "email": "taylorotwell@gmail.com"
                 }
             ],
-            "time": "2013-04-30 20:01:45"
-        },
-        {
-            "name": "illuminate/database",
-            "version": "dev-master",
-            "target-dir": "Illuminate/Database",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/illuminate/database.git",
-                "reference": "b41bfad7715027eba6e746aa3039826e16b92254"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/b41bfad7715027eba6e746aa3039826e16b92254",
-                "reference": "b41bfad7715027eba6e746aa3039826e16b92254",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/container": "4.0.x",
-                "illuminate/events": "4.0.x",
-                "illuminate/support": "4.0.x",
-                "nesbot/carbon": "1.*",
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "illuminate/console": "4.0.x",
-                "illuminate/filesystem": "4.0.x",
-                "illuminate/pagination": "4.0.x",
-                "illuminate/support": "4.0.x",
-                "mockery/mockery": "0.7.2",
-                "phpunit/phpunit": "3.7.*"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Illuminate\\Database": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "authors": [
-                {
-                    "name": "Taylor Otwell",
-                    "email": "taylorotwell@gmail.com"
-                }
-            ],
-            "description": "An elegant database abstraction library.",
-            "keywords": [
-                "database",
-                "laravel",
-                "orm",
-                "sql"
-            ],
-            "time": "2013-05-09 01:02:05"
-        },
-        {
-            "name": "illuminate/events",
-            "version": "dev-master",
-            "target-dir": "Illuminate/Events",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/illuminate/events.git",
-                "reference": "6ea4f171da9b5b302834276ed6c9b1229ca85522"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/events/zipball/6ea4f171da9b5b302834276ed6c9b1229ca85522",
-                "reference": "6ea4f171da9b5b302834276ed6c9b1229ca85522",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/container": "4.0.x",
-                "illuminate/support": "4.0.x",
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "0.7.2",
-                "phpunit/phpunit": "3.7.*"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Illuminate\\Events": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "authors": [
-                {
-                    "name": "Taylor Otwell",
-                    "email": "taylorotwell@gmail.com"
-                }
-            ],
-            "description": "A simple, powerful events system.",
-            "time": "2013-05-02 16:43:30"
+            "time": "2013-05-28 18:31:39"
         },
         {
             "name": "illuminate/support",
@@ -443,12 +341,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "ae598ed1e33c734ed9beeb4ffd13b8f39c403b01"
+                "reference": "720e832ef85b7af97c49c70016771ed4f5e2a88b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/ae598ed1e33c734ed9beeb4ffd13b8f39c403b01",
-                "reference": "ae598ed1e33c734ed9beeb4ffd13b8f39c403b01",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/720e832ef85b7af97c49c70016771ed4f5e2a88b",
+                "reference": "720e832ef85b7af97c49c70016771ed4f5e2a88b",
                 "shasum": ""
             },
             "require": {
@@ -462,7 +360,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.0-dev"
+                    "dev-master": "4.1-dev"
                 }
             },
             "autoload": {
@@ -474,14 +372,16 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
             "authors": [
                 {
                     "name": "Taylor Otwell",
                     "email": "taylorotwell@gmail.com"
                 }
             ],
-            "description": "Various utilities and support functions.",
-            "time": "2013-05-10 04:38:58"
+            "time": "2013-06-13 01:37:55"
         },
         {
             "name": "ircmaxell/password-compat",
@@ -571,12 +471,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/pornel/PHPTAL.git",
-                "reference": "2472ae1a7d21999881c548b443a5cecbe945895d"
+                "reference": "a99ce90de7f9a0aaf06477f04bd0a5e3a8f9d8c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pornel/PHPTAL/zipball/2472ae1a7d21999881c548b443a5cecbe945895d",
-                "reference": "2472ae1a7d21999881c548b443a5cecbe945895d",
+                "url": "https://api.github.com/repos/pornel/PHPTAL/zipball/a99ce90de7f9a0aaf06477f04bd0a5e3a8f9d8c6",
+                "reference": "a99ce90de7f9a0aaf06477f04bd0a5e3a8f9d8c6",
                 "shasum": ""
             },
             "require": {
@@ -611,7 +511,7 @@
                 "template engine",
                 "zope"
             ],
-            "time": "2013-04-17 16:25:11"
+            "time": "2013-06-03 13:07:37"
         },
         {
             "name": "psr/log",
