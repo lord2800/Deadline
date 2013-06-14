@@ -7,8 +7,7 @@ use Deadline\Factory\RouterFactory,
 
 use Psr\Log\LoggerInterface;
 
-use Http\Exception\Client\NotFound as HttpNotFound,
-	Http\Exception\Server\NotImplemented as HttpNotImplemented;
+use Http\Exception\Server\NotImplemented as HttpNotImplemented;
 
 class Dispatcher {
 	private $routerfactory, $controllerfactory, $logger, $acl;
@@ -26,7 +25,7 @@ class Dispatcher {
 		$this->logger->debug('Finding route for ' . $request->verb . ' ' . $request->path);
 		$route = $router->route($request);
 		if($route === null) {
-			throw new HttpNotFound('No route for ' . $request->path);
+			throw new RouteNotFoundException('No route for ' . $request->path);
 		}
 		$this->logger->debug('Found route ' . $route->route->controller . '::' . $route->route->method);
 
@@ -48,7 +47,7 @@ class Dispatcher {
 			$response = call_user_func_array([$container, $route->method], $args);
 			App::$monitor->snapshot('Controller route finished');
 		} else {
-			throw new HttpNotFound('No handler for ' . $route->controller . '->' . $route->method);
+			throw new HttpNotImplemented('No handler for ' . $route->controller . '->' . $route->method);
 		}
 		if(method_exists($controller, 'shutdown')) {
 			$this->logger->debug('Calling controller shutdown function');

@@ -50,7 +50,7 @@ class App {
 		$request = $this->injector->get('Request');
 		try {
 			$this->tryRoute($request);
-		} catch(HttpNotFound $e) {
+		} catch(RouteNotFoundException $e) {
 			// try again with the default route
 			$defaultRoute = $this->store->get('default_route', '/');
 			$this->logger->debug('Specified route not found, rerouting to ' . $defaultRoute);
