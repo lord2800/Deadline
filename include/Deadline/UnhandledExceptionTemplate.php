@@ -2,6 +2,7 @@
 namespace Deadline;
 
 use Deadline\Request,
+	Deadline\Response,
 	Deadline\Factory\ViewFactory;
 
 use ExceptionGUI\Parser\ExceptionParsed;
@@ -48,6 +49,12 @@ class UnhandledExceptionTemplate implements TemplateEngineInterface {
 		$response->exception = new JsonExceptionParsed($exceptionParsed);
 		$response->lang		 = 'en';
 		$response->setTemplate('exception.tal');
+		$exception = $exceptionParsed->getException();
+		if(method_exists($exception, 'getStatusCode')){
+			$status = trim(preg_replace_callback('/([A-Z])/', function ($m) { return ' ' . strtolower($m[1]); }, get_class($exception)));
+			$status = sprintf('%d %s', $exception->getStatusCode(), $status);
+			$response->setHeader('Status', $status, true, $exception->getStatusCode());
+		}
 
 		$view = $this->viewfactory->get($this->request, $response);
 		$view->render($response);

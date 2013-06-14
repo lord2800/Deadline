@@ -13,7 +13,8 @@ use Psr\Log\LoggerInterface;
 use ExceptionGUI\ExceptionHandler;
 use PHPBenchmark\Monitor;
 
-use Http\Exception\AbstractException as HttpException;
+use Http\Exception\Client\NotFound as HttpNotFound,
+	Http\Exception\AbstractException as HttpException;
 
 class App {
 	private function __construct() {
@@ -46,29 +47,33 @@ class App {
 
 	public function getDispatcher() { return $this->dispatcher; }
 	public final function serve() {
+		$request = $this->injector->get('Request');
 		try {
-			$response = $this->getDispatcher()->dispatch();
-			if($response === null) {
-				throw new HttpNotImplemented('No response available');
-			}
-		} catch(Exception $e) {
-			$status = trim(preg_replace_callback('/([A-Z])/', function ($m) { return ' ' . strtolower($m[1]); }, get_class($e)));
+			$this->tryRoute($request);
+		} catch(HttpNotFound $e) {
+			// try again with the default route
+			$defaultRoute = $this->store->get('default_route', '/');
+			$this->logger->debug('Specified route not found, rerouting to ' . $defaultRoute);
+			$request->path = $defaultRoute;
+			$this->tryRoute($request);
+		}
+	}
 
-			$response = (new Response(['exception' => $e]))
-						->setTemplate('exception.html')
-						->setHeader('Status', sprintf('%d %s', $e->getStatusCode(), $status));
+	private function tryRoute(Request $request) {
+		$response = $this->getDispatcher()->dispatch($request);
+		if($response === null) {
+			throw new HttpNotImplemented('No response');
 		}
 
 		$this->logger->debug('Getting a view for the request');
-		$view = $this->viewfactory->get($this->injector->get('Request'), $response);
-
+		$view = $this->viewfactory->get($request, $response);
 		static::$monitor->snapshot('View constructed');
 		if($view !== null) {
 			$this->logger->debug('Sending response');
 			$view->render($response);
 			static::$monitor->snapshot('Response rendered');
 		} else {
-			// ...?
+			throw new HttpNotImplemented('View not found for response ' . print_r($response, true));
 		}
 	}
 

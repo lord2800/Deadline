@@ -21,9 +21,13 @@ class Route implements JsonSerializable {
 	}
 	public function match($uri) {
 		$route = $this->route;
-		$variables = []; //array_merge($this->optional, []);
+		$variables = [];
 		foreach($this->optional as $var) {
 			$variables[$var['name']] = $var['default'];
+		}
+		if(substr_count($route, '/') !== substr_count($uri, '/')) {
+			// reject routes that don't have the same piece count as the uri
+			return false;
 		}
 		for($i = 0, $j = 0, $len = min(strlen($uri), strlen($route)); $i < $len && $j < $len; $i++, $j++) {
 			// it doesn't match, fail

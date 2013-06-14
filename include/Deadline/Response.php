@@ -4,7 +4,7 @@ namespace Deadline;
 use Deadline\App;
 
 class Response {
-	private $params = [], $downloadable = false, $type = null, $template = 'blank.html';
+	private $params = [], $downloadable = false, $type = null, $template = 'blank.html', $status = null;
 
 	public function __set($name, $value) { $this->params[$name] = $value; }
 	public function __get($name) { return isset($this->params[$name]) ? $this->params[$name] : null; }
@@ -57,9 +57,14 @@ class Response {
 		return $this;
 	}
 
-	public function setHeader($name, $value, $replace = false) {
+	public function setHeader($name, $value, $replace = false, $code = 200) {
 		$header = sprintf('%s: %s', str_replace(' ', '-', ucwords($name)), $value);
 		header($header, $replace);
+		// accept the first status code passed and only allow Status headers to override the status code
+		if(empty($this->status) || ($name == 'Status' && $replace)) {
+			http_response_code($code);
+			$this->status = $code;
+		}
 		return $this;
 	}
 }
