@@ -51,6 +51,11 @@ abstract class PdoDataMapper implements IDataMapper {
 		$this->db->commit();
 	}
 
+	private final function getClassFromObject($object) {
+		$parts = explode('\\', get_class($object));
+		return end($parts);
+	}
+
 	/* 
 	 * NB: this function is limited; it assumes your table has an id field that is unique, and does not
 	 * handle composite keys in any way whatsoever, nor does it attempt to handle foreign keys--you must
@@ -58,7 +63,7 @@ abstract class PdoDataMapper implements IDataMapper {
 	 * properties on your object.
 	 */
 	public final function persist($object) {
-		$table = $this->mung(get_class($object));
+		$table = $this->mung($this->getClassFromObject($object));
 		$vars = get_class_vars($object);
 		$data = [];
 		foreach($vars as $name => $default) {
@@ -92,12 +97,12 @@ abstract class PdoDataMapper implements IDataMapper {
 		return $object;
 	}
 	public final function destroy($object) {
-		$table = $this->mung(get_class($object));
+		$table = $this->mung($this->getClassFromObject($object));
 		$id = $object->id;
 		return $this->query('DELETE FROM ' . $table . ' WHERE id = ? LIMIT 1;', [$id]);
 	}
 
-	protected final function findByKey($model, $key, $value, array $options = []) {
+	protected final function findByKey($model, $keys, $values, array $options = []) {
 		$options = array_merge($options, [
 			'limit' => 0,
 			'projection' => []
@@ -105,7 +110,12 @@ abstract class PdoDataMapper implements IDataMapper {
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? '*' : '`' . implode('`,`', $projection) . '`';
-		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($model) . ' WHERE ' . $key . ' = ?' . $limit . ';', [$value], $model);
+		if(!is_array($keys)) {
+			$keys = [$keys];
+		}
+		// finding by an array of keys should always use an AND-joined where clause
+		$keys = $this->genSlots(['type' => 'where', 'keys' => $keys, 'join' => 'AND']);
+		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($model) . ' WHERE ' . $keys . $limit . ';', [$value], $model);
 
 	}
 	protected final function findById($model, $id, array $projection = []) {
@@ -141,15 +151,19 @@ abstract class PdoDataMapper implements IDataMapper {
 		return lcfirst(preg_replace_callback('/_([a-z])/', function ($m) { return strtoupper($m[1]); }, $thing));
 	}
 	protected final function genSlots(array $opts) {
-		$opts = array_merge(['type' => 'placeholders', 'keys' => []], $opts);
+		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'join' => 'AND'], $opts);
 		$returns = [
 			'insert' => function () use($opts) {
 				$values = '';
 				array_walk($opts['keys'], function ($value, $name) use($values) { $values .= '`' . $name . '` = :' . $name . ', '; });
 				return substr($values, 0, -2);
 			},
+			// TODO update is a special case of where in that the join is a ,
 			'update' => function () use($opts) {
 				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ', '; return $result; }, ''), 0, -2);
+			},
+			'where' => function () use($opts) {
+				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ' = ? ' . $opts['join'] . ' '; return $result; }, ''), 0, -4);
 			},
 			'placeholders' => function () use($opts) {
 				return substr(str_repeat('?, ', count($opts['keys'])), 0, -2);
