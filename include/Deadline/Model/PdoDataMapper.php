@@ -163,7 +163,8 @@ abstract class PdoDataMapper implements IDataMapper {
 				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ', '; return $result; }, ''), 0, -2);
 			},
 			'where' => function () use($opts) {
-				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ' = ? ' . $opts['join'] . ' '; return $result; }, ''), 0, -4);
+				$j = $opts['join'];
+				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ' = ? ' . $j . ' '; return $result; }, ''), 0, -4);
 			},
 			'placeholders' => function () use($opts) {
 				return substr(str_repeat('?, ', count($opts['keys'])), 0, -2);

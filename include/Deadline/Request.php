@@ -64,7 +64,7 @@ class Request {
 			case 'uri': return $this->serverInput('REQUEST_URI', 'string'); break;
 			case 'verb': return $this->serverInput('REQUEST_METHOD', 'string'); break;
 			case 'rawBody': return $this->body ?: ($this->body = file_get_contents('php://input')); break;
-			case 'jsonBody': return json_decode($this->body); break;
+			case 'jsonBody': return json_decode($this->rawBody); break;
 		}
 	}
 	public function __set($name, $value) {
