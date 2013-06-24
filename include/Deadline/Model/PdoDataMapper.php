@@ -64,7 +64,7 @@ abstract class PdoDataMapper implements IDataMapper {
 	 */
 	public final function persist($object) {
 		$table = $this->mung($this->getClassFromObject($object));
-		$vars = get_class_vars($object);
+		$vars = get_class_vars(get_class($object));
 		$data = [];
 		foreach($vars as $name => $default) {
 			$data[$name] = $object->$name;
@@ -88,11 +88,11 @@ abstract class PdoDataMapper implements IDataMapper {
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
-			$query->bindParam($this->mung($name), $value, static::$typemap[gettype($value)]);
+			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
 		}
 		$query->execute($data);
 		if($isNew) {
-			$object->id = $query->lastInsertId();
+			$object->id = $this->db->lastInsertId();
 		}
 		return $object;
 	}
@@ -114,7 +114,7 @@ abstract class PdoDataMapper implements IDataMapper {
 			$keys = [$keys];
 		}
 		// finding by an array of keys should always use an AND-joined where clause
-		$keys = $this->genSlots(['type' => 'where', 'keys' => $keys, 'join' => 'AND']);
+		$keys = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
 		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($model) . ' WHERE ' . $keys . $limit . ';', [$value], $model);
 
 	}
@@ -150,27 +150,26 @@ abstract class PdoDataMapper implements IDataMapper {
 		// name unmunging strategy: undo the above
 		return lcfirst(preg_replace_callback('/_([a-z])/', function ($m) { return strtoupper($m[1]); }, $thing));
 	}
-	protected final function genSlots(array $opts) {
-		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'join' => 'AND'], $opts);
+	public static final function genSlots(array $opts) {
+		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'link' => 'AND'], $opts);
 		$returns = [
-			'insert' => function () use($opts) {
-				$values = '';
-				array_walk($opts['keys'], function ($value, $name) use($values) { $values .= '`' . $name . '` = :' . $name . ', '; });
-				return substr($values, 0, -2);
-			},
-			// TODO update is a special case of where in that the join is a ,
 			'update' => function () use($opts) {
+				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= '`' . $k . '` = :' . $k . ', '; return $result; }, ''), 0, -2);
+			},
+			'insert' => function () use($opts) {
 				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ', '; return $result; }, ''), 0, -2);
 			},
 			'where' => function () use($opts) {
-				$j = $opts['join'];
-				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ' = ? ' . $j . ' '; return $result; }, ''), 0, -4);
+				$j = $opts['link'];
+				$sub = -1*(strlen($j)+2);
+				return substr(array_reduce($opts['keys'], function (&$result, $k) use($j) { $result .= '`' . $k . '` = :' . $k . ' ' . $j . ' '; return $result; }, ''), 0, $sub);
 			},
 			'placeholders' => function () use($opts) {
 				return substr(str_repeat('?, ', count($opts['keys'])), 0, -2);
 			}
 		];
 
-		return $returns[$opts['type']]();
+		$slots = $returns[$opts['type']]();
+		return $slots;
 	}
 }
