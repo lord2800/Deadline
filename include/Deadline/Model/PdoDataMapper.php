@@ -146,7 +146,8 @@ abstract class PdoDataMapper implements IDataMapper {
 		]);
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
-		$projection = empty($projection) ? '*' : '`' . implode('`,`', $projection) . '`';
+		// TODO eliminate the * and get all the properties from the model
+		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
 		if(!is_array($keys)) {
 			$keys = [$keys];
 		}
@@ -155,7 +156,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		}
 		// finding by an array of keys should always use an AND-joined where clause
 		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
-		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
+		return $this->query('SELECT `' . implode('`,`', $projection) . '` FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
 
 	}
 	protected final function findById($model, $id, array $projection = []) {
@@ -168,8 +169,8 @@ abstract class PdoDataMapper implements IDataMapper {
 		]);
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
-		$projection = empty($projection) ? '*' : '`' . implode('`,`', $projection) . '`';
-		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($this->getClassname($model)) . $limit . ';');
+		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
+		return $this->query('SELECT `' . implode('`,`', $projection) . '` FROM ' . $this->mung($this->getClassname($model)) . $limit . ';');
 	}
 	protected final function query($sql, array $params, $model = '') {
 		$this->logger->debug('Running SQL: ' . $sql);
