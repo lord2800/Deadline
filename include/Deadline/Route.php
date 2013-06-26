@@ -21,6 +21,8 @@ class Route implements JsonSerializable {
 	}
 	public function match($uri) {
 		$route = $this->route;
+		// normalize the route by removing the trailing slash
+		if($uri[strlen($uri)-1] == '/') $uri = substr($uri, 0, -1);
 		$variables = [];
 		foreach($this->optional as $var) {
 			$variables[$var['name']] = $var['default'];
