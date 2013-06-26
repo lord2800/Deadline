@@ -52,7 +52,10 @@ abstract class PdoDataMapper implements IDataMapper {
 	}
 
 	private final function getClassFromObject($object) {
-		$parts = explode('\\', get_class($object));
+		return $this->getClassname(get_class($object));
+	}
+	private final function getClassname($ns) {
+		$parts = explode('\\', $ns);
 		return end($parts);
 	}
 
@@ -63,6 +66,19 @@ abstract class PdoDataMapper implements IDataMapper {
 	 * properties on your object.
 	 */
 	public final function persist($object) {
+		if(!property_exists($object, 'id')) {
+			throw new LogicException('In order to persist an object, it must have a unique property called "id"');
+		}
+		if(empty($object->id)) {
+			// if the id is empty, we want to insert
+			$this->insert($object);
+		} else {
+			// otherwise, we want to update on that id
+			$this->update($object);
+		}
+	}
+	// internal helper code de-duplication function
+	private function massageObject($object) {
 		$table = $this->mung($this->getClassFromObject($object));
 		$vars = get_class_vars(get_class($object));
 		$data = [];
@@ -73,27 +89,48 @@ abstract class PdoDataMapper implements IDataMapper {
 		foreach($keys as &$key) {
 			$key = $this->mung($key);
 		}
-
-		$isNew = !array_key_exists('id', $data) || empty($data['id']);
-		$sql = null;
-		if($isNew) {
-			// if we don't have an id or the id is empty, we want to insert
-			$sql = 'INSERT INTO ' . $table . ' (`' . implode('`,`', $keys) . '`) VALUES (' . $this->genSlots(['type' => 'insert', 'keys' => $keys]) . ');';
-		} else {
-			// otherwise, we want to update on that id
-			unset($keys['id']);
-			$sql = 'UPDATE ' . $table . ' SET ' . $this->genSlots(['type' => 'update', 'keys' => $keys]) . ' WHERE `id` = :id LIMIT 1;';
-		}
-
+		return [$table, $keys, $data];
+	}
+	public final function insert($object) {
+		list($table, $keys, $data) = $this->massageObject($object);
+		$sql = 'INSERT INTO ' . $table . ' (`' . implode('`,`', $keys) . '`) VALUES (' . $this->genSlots(['type' => 'insert', 'keys' => $keys]) . ');';
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
 			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
 		}
 		$query->execute($data);
-		if($isNew) {
-			$object->id = $this->db->lastInsertId();
+		$object->id = $this->db->lastInsertId();
+		return $object;
+	}
+	public final function update($object) {
+		list($table, $keys, $data) = $this->massageObject($object);
+		// remove the id from the slots list--it's handled externally
+		$slots = array_diff($keys, ['id']);
+		$sql = 'UPDATE ' . $table . ' SET ' . $this->genSlots(['type' => 'update', 'keys' => $slots]) . ' WHERE `id` = :id LIMIT 1;';
+		$this->logger->debug('Generated SQL: ' . $sql);
+		$query = $this->db->prepare($sql);
+		foreach($data as $name => $value) {
+			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
 		}
+		$query->execute($data);
+		return $object;
+	}
+	public final function replace($object) {
+		// TODO make this portable, damnedable upserts...
+		list($table, $keys, $data) = $this->massageObject($object);
+		$sql = 'INSERT INTO ' . $table . ' (`' . implode('`,`', $keys) . '`) VALUES (' .
+				$this->genSlots(['type' => 'insert', 'keys' => $keys]) .
+			') ON DUPLICATE KEY UPDATE ' .
+				$this->genSlots(['type' => 'update', 'keys' => $keys]) .
+			';';
+		$this->logger->debug('Generated SQL: ' . $sql);
+		$query = $this->db->prepare($sql);
+		foreach($data as $name => $value) {
+			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
+		}
+		$query->execute($data);
+		$object->id = $this->db->lastInsertId();
 		return $object;
 	}
 	public final function destroy($object) {
@@ -113,9 +150,12 @@ abstract class PdoDataMapper implements IDataMapper {
 		if(!is_array($keys)) {
 			$keys = [$keys];
 		}
+		if(!is_array($values)) {
+			$values = [$values];
+		}
 		// finding by an array of keys should always use an AND-joined where clause
-		$keys = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
-		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($model) . ' WHERE ' . $keys . $limit . ';', [$value], $model);
+		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
+		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
 
 	}
 	protected final function findById($model, $id, array $projection = []) {
@@ -129,13 +169,15 @@ abstract class PdoDataMapper implements IDataMapper {
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? '*' : '`' . implode('`,`', $projection) . '`';
-		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($model) . $limit . ';');
+		return $this->query('SELECT ' . $projection . ' FROM ' . $this->mung($this->getClassname($model)) . $limit . ';');
 	}
 	protected final function query($sql, array $params, $model = '') {
 		$this->logger->debug('Running SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		if(!empty($model)) {
-			$query->setFetchMode(self::FETCH_CLASS | self::FETCH_PROPS_LATE, $model);
+			if(!$query->setFetchMode(self::FETCH_CLASS | self::FETCH_PROPS_LATE, $model)) {
+				throw new \LogicException('Failed to set fetch mode to class: ' . $model);
+			}
 		}
 		if($query->execute($params)) {
 			return $query;
