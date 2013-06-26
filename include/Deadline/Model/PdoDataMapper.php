@@ -170,7 +170,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
-		return $this->query('SELECT `' . implode('`,`', $projection) . '` FROM ' . $this->mung($this->getClassname($model)) . $limit . ';');
+		return $this->query('SELECT `' . implode('`,`', $projection) . '` FROM ' . $this->mung($this->getClassname($model)) . $limit . ';', []);
 	}
 	protected final function query($sql, array $params, $model = '') {
 		$this->logger->debug('Running SQL: ' . $sql);
