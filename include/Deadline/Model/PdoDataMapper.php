@@ -146,7 +146,6 @@ abstract class PdoDataMapper implements IDataMapper {
 		]);
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
-		// TODO eliminate the * and get all the properties from the model
 		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
 		if(!is_array($keys)) {
 			$keys = [$keys];
