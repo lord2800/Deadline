@@ -86,14 +86,13 @@ abstract class PdoDataMapper implements IDataMapper {
 			$data[$name] = $object->$name;
 		}
 		$keys = array_keys($data);
-		foreach($keys as &$key) {
-			$key = $this->mung($key);
-		}
 		return [$table, $keys, $data];
 	}
 	public final function insert($object) {
 		list($table, $keys, $data) = $this->massageObject($object);
-		$sql = 'INSERT INTO ' . $table . ' (`' . implode('`,`', $keys) . '`) VALUES (' . $this->genSlots(['type' => 'insert', 'keys' => $keys]) . ');';
+		$sql = 'INSERT INTO ' . $table . ' (' .
+				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $keys)) .
+			') VALUES (' . $this->genSlots(['type' => 'insert', 'keys' => $keys]) . ');';
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
@@ -119,7 +118,9 @@ abstract class PdoDataMapper implements IDataMapper {
 	public final function replace($object) {
 		// TODO make this portable, damnedable upserts...
 		list($table, $keys, $data) = $this->massageObject($object);
-		$sql = 'INSERT INTO ' . $table . ' (`' . implode('`,`', $keys) . '`) VALUES (' .
+		$sql = 'INSERT INTO ' . $table . ' (' .
+				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $keys)) .
+			') VALUES (' .
 				$this->genSlots(['type' => 'insert', 'keys' => $keys]) .
 			') ON DUPLICATE KEY UPDATE ' .
 				$this->genSlots(['type' => 'update', 'keys' => $keys]) .
@@ -153,9 +154,12 @@ abstract class PdoDataMapper implements IDataMapper {
 		if(!is_array($values)) {
 			$values = [$values];
 		}
+		//array_map(function ($key) { return $this->mung($key) . ' AS ' . $this->unmung($key); }, $projection);
 		// finding by an array of keys should always use an AND-joined where clause
 		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
-		return $this->query('SELECT `' . implode('`,`', $projection) . '` FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
+		return $this->query('SELECT ' .
+				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $keys)) .
+			' FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
 
 	}
 	protected final function findById($model, $id, array $projection = []) {
@@ -169,7 +173,9 @@ abstract class PdoDataMapper implements IDataMapper {
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
-		return $this->query('SELECT `' . implode('`,`', $projection) . '` FROM ' . $this->mung($this->getClassname($model)) . $limit . ';', []);
+		return $this->query('SELECT ' .
+				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $projection)) .
+			' FROM ' . $this->mung($this->getClassname($model)) . $limit . ';', []);
 	}
 	protected final function query($sql, array $params, $model = '') {
 		$this->logger->debug('Running SQL: ' . $sql);
