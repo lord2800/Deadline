@@ -158,7 +158,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		// finding by an array of keys should always use an AND-joined where clause
 		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
 		return $this->query('SELECT ' .
-				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $keys)) .
+				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $projection)) .
 			' FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
 
 	}
