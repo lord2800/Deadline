@@ -51,14 +51,20 @@ class SentryAcl extends Acl {
 	}
 	public function hasPermission($call) { return $this->sentry->getUser()->hasAccess($call); }
 	public function getUserId() { return $this->sentry->getUser()->getId(); }
-	public function register(array $params) { return $this->sentry->register($params); }
 	public function activate($code) { return $this->sentry->attemptActivation($code); }
 	public function resetPassword($code, $newPassword) { return $this->sentry->attemptResetPassword($code, $newPassword); }
+	public function register(array $params, $activate = false) {
+		$this->sentry->register($params);
+		if($activate) {
+			return $this->activate($this->sentry->getUser()->getActivationCode());
+		}
+		return $code;
+	}
 	public function login($credentials) {
 		try {
-			return $this->sentry->authenticateAndRemember($credentials);
+			return $this->sentry->authenticate(['login' => $credentials['login'], 'password' => $credentials['password']], $credentials['remember']);
 		} catch(\Exception $e) {
-			return null;
+			return $e;
 		}
 	}
 	public function logout() {

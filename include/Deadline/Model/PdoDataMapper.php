@@ -90,8 +90,13 @@ abstract class PdoDataMapper implements IDataMapper {
 	}
 	public final function insert($object) {
 		list($table, $keys, $data) = $this->massageObject($object);
+
+		// never include an id for an insert, we assume the id is the primary key of the table and should be autoincremented
+		unset($keys[array_search('id', $keys, true)]);
+		unset($data['id']);
+
 		$sql = 'INSERT INTO ' . $table . ' (' .
-				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $keys)) .
+				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '`'; }, $keys)) .
 			') VALUES (' . $this->genSlots(['type' => 'insert', 'keys' => $keys]) . ');';
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
@@ -106,13 +111,18 @@ abstract class PdoDataMapper implements IDataMapper {
 		list($table, $keys, $data) = $this->massageObject($object);
 		// remove the id from the slots list--it's handled externally
 		$slots = array_diff($keys, ['id']);
+		$slots = array_map(function ($slot) { return $this->mung($slot); }, $slots);
+
+		$keys = array_map(function ($key) { return $this->mung($key); }, array_keys($data));
+		$values = array_values($data);
+
 		$sql = 'UPDATE ' . $table . ' SET ' . $this->genSlots(['type' => 'update', 'keys' => $slots]) . ' WHERE `id` = :id LIMIT 1;';
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
 			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
 		}
-		$query->execute($data);
+		$query->execute(array_combine($keys, $values));
 		return $object;
 	}
 	public final function replace($object) {
@@ -154,8 +164,8 @@ abstract class PdoDataMapper implements IDataMapper {
 		if(!is_array($values)) {
 			$values = [$values];
 		}
-		//array_map(function ($key) { return $this->mung($key) . ' AS ' . $this->unmung($key); }, $projection);
 		// finding by an array of keys should always use an AND-joined where clause
+		$keys = array_map(function ($key) { return $this->mung($key); }, $keys);
 		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
 		return $this->query('SELECT ' .
 				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $projection)) .
