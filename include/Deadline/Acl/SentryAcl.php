@@ -34,7 +34,7 @@ class SentryAcl extends Acl {
 		$cookie = new NativeCookie();
 		$this->sentry = new Sentry($userProvider, $groupProvider, $throttleProvider, $session, $cookie);
 
-		if(!$this->sentry->check()) {
+		if(!$this->authed()) {
 			try {
 				$anonymous = $this->sentry->getUserProvider()->findByLogin('anonymous@example.com');
 			} catch(UserNotFoundException $e) {
@@ -48,6 +48,9 @@ class SentryAcl extends Acl {
 
 			$this->sentry->login($anonymous, false);
 		}
+	}
+	public function authed() {
+		return $this->sentry->check() && $this->getUserId() != $this->sentry->getUserProvider()->findByLogin('anonymous@example.com')->getId();
 	}
 	public function hasPermission($call) { return $this->sentry->getUser()->hasAccess($call); }
 	public function getUserId() { return $this->sentry->getUser()->getId(); }

@@ -59,6 +59,18 @@ abstract class PdoDataMapper implements IDataMapper {
 		return end($parts);
 	}
 
+	protected final function getTableName($model) {
+		return self::mung($this->getClassname($model));
+	}
+
+	protected final function getColumns($object) {
+		if(!is_string($object)) {
+			$object = get_class($object);
+		}
+
+		return get_class_vars($object);
+	}
+
 	/* 
 	 * NB: this function is limited; it assumes your table has an id field that is unique, and does not
 	 * handle composite keys in any way whatsoever, nor does it attempt to handle foreign keys--you must
@@ -80,7 +92,7 @@ abstract class PdoDataMapper implements IDataMapper {
 	// internal helper code de-duplication function
 	private function massageObject($object) {
 		$table = $this->mung($this->getClassFromObject($object));
-		$vars = get_class_vars(get_class($object));
+		$vars = $this->getColumns($object);
 		$data = [];
 		foreach($vars as $name => $default) {
 			$data[$name] = $object->$name;
@@ -95,15 +107,14 @@ abstract class PdoDataMapper implements IDataMapper {
 		unset($keys[array_search('id', $keys, true)]);
 		unset($data['id']);
 
-		$sql = 'INSERT INTO ' . $table . ' (' .
-				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '`'; }, $keys)) .
+		$sql = 'INSERT INTO ' . $table . ' (' . $this->genSlots(['type' => 'fields', 'keys' => $keys, 'rename' => false]) .
 			') VALUES (' . $this->genSlots(['type' => 'insert', 'keys' => $keys]) . ');';
-		$this->logger->debug('Generated SQL: ' . $sql);
+		$this->logger->debug('Generated SQL: ' . $sql . ' for data ' . var_export($data, true));
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
-			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
+			$query->bindValue($name, $value, self::$typemap[strtolower(gettype($value))]);
 		}
-		$query->execute($data);
+		$query->execute();
 		$object->id = $this->db->lastInsertId();
 		return $object;
 	}
@@ -120,27 +131,27 @@ abstract class PdoDataMapper implements IDataMapper {
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
-			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
+			$query->bindValue($name, $value, self::$typemap[strtolower(gettype($value))]);
 		}
-		$query->execute(array_combine($keys, $values));
+		$query->execute();
 		return $object;
 	}
 	public final function replace($object) {
 		// TODO make this portable, damnedable upserts...
 		list($table, $keys, $data) = $this->massageObject($object);
 		$sql = 'INSERT INTO ' . $table . ' (' .
-				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $keys)) .
+				$this->genSlots(['type' => 'fields', 'keys' => $projection, 'rename' => false]) .
 			') VALUES (' .
 				$this->genSlots(['type' => 'insert', 'keys' => $keys]) .
 			') ON DUPLICATE KEY UPDATE ' .
-				$this->genSlots(['type' => 'update', 'keys' => $keys]) .
+				$this->genSlots(['type' => 'update', 'keys' => array_map(function ($key) { return $this->mung($key); }, $keys)]) .
 			';';
 		$this->logger->debug('Generated SQL: ' . $sql);
 		$query = $this->db->prepare($sql);
 		foreach($data as $name => $value) {
-			$query->bindValue($this->mung($name), $value, self::$typemap[strtolower(gettype($value))]);
+			$query->bindValue($name, $value, self::$typemap[strtolower(gettype($value))]);
 		}
-		$query->execute($data);
+		$query->execute();
 		$object->id = $this->db->lastInsertId();
 		return $object;
 	}
@@ -167,8 +178,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		// finding by an array of keys should always use an AND-joined where clause
 		$keys = array_map(function ($key) { return $this->mung($key); }, $keys);
 		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
-		return $this->query('SELECT ' .
-				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $projection)) .
+		return $this->query('SELECT ' . $this->genSlots(['type' => 'fields', 'keys' => $projection]) .
 			' FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
 
 	}
@@ -183,9 +193,8 @@ abstract class PdoDataMapper implements IDataMapper {
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
-		return $this->query('SELECT ' .
-				implode(',', array_map(function ($key) { return '`' . $this->mung($key) . '` AS `' . $this->unmung($key) . '`'; }, $projection)) .
-			' FROM ' . $this->mung($this->getClassname($model)) . $limit . ';', []);
+		return $this->query('SELECT ' . $this->genSlots(['type' => 'fields', 'keys' => $projection]) .
+			' FROM ' . $this->mung($this->getClassname($model)) . $limit . ';', [], $model);
 	}
 	protected final function query($sql, array $params, $model = '') {
 		$this->logger->debug('Running SQL: ' . $sql);
@@ -200,19 +209,19 @@ abstract class PdoDataMapper implements IDataMapper {
 		}
 		return [];
 	}
-	protected final function mung($thing) {
+	protected static final function mung($thing) {
 		// name munging strategy for now: translate camelCase into camel_case
 		return preg_replace_callback('/([A-Z])/', function ($m) { return '_' . strtolower($m[1]); }, lcfirst($thing));
 	}
-	protected final function unmung($thing) {
+	protected static final function unmung($thing) {
 		// name unmunging strategy: undo the above
 		return lcfirst(preg_replace_callback('/_([a-z])/', function ($m) { return strtoupper($m[1]); }, $thing));
 	}
 	public static final function genSlots(array $opts) {
-		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'link' => 'AND'], $opts);
+		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'link' => 'AND', 'rename' => true], $opts);
 		$returns = [
 			'update' => function () use($opts) {
-				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= '`' . $k . '` = :' . $k . ', '; return $result; }, ''), 0, -2);
+				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= '`' . $k . '` = :' . self::unmung($k) . ', '; return $result; }, ''), 0, -2);
 			},
 			'insert' => function () use($opts) {
 				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= ':' . $k . ', '; return $result; }, ''), 0, -2);
@@ -224,6 +233,11 @@ abstract class PdoDataMapper implements IDataMapper {
 			},
 			'placeholders' => function () use($opts) {
 				return substr(str_repeat('?, ', count($opts['keys'])), 0, -2);
+			},
+			'fields' => function () use($opts) {
+				return implode(',', array_map(function ($key) use($opts) {
+					return '`' . (empty($opts['prefix']) ? '' : $opts['prefix'] . '`.`') . self::mung($key) . '`' . ($opts['rename'] ? ' AS `' . self::unmung($key) . '`' : '');
+				}, $opts['keys']));
 			}
 		];
 
