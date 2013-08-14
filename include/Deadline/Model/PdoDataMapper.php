@@ -140,7 +140,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		// TODO make this portable, damnedable upserts...
 		list($table, $keys, $data) = $this->massageObject($object);
 		$sql = 'INSERT INTO ' . $table . ' (' .
-				$this->genSlots(['type' => 'fields', 'keys' => $projection, 'rename' => false]) .
+				$this->genSlots(['type' => 'fields', 'keys' => $keys, 'rename' => false]) .
 			') VALUES (' .
 				$this->genSlots(['type' => 'insert', 'keys' => $keys]) .
 			') ON DUPLICATE KEY UPDATE ' .
