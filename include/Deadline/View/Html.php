@@ -45,7 +45,6 @@ class Html extends View {
 		$phptal->setOutputMode(PHPTAL::HTML5)
 			->setEncoding('UTF-8')
 			->setForceReparse(!$this->store->get('live', false))
-			->setPhpCodeDestination(ProjectStreamWrapper::getProjectName() . '://cache')
 			->setTemplateRepository(ProjectStreamWrapper::resolve(ProjectStreamWrapper::getProjectName() . '://public/templates/' . $template))
 			->addPreFilter(new PHPTAL_PreFilter_StripComments())
 			->addPreFilter(new PHPTAL_PreFilter_Normalize())
@@ -53,6 +52,11 @@ class Html extends View {
 			->setPostFilter(new PostFilterChain($this->filters))
 			->setTranslator(new KeyValueTranslationService($this->translator))
 			->setTemplate($response->getTemplate());
+
+		if(!$this->store->get('live', false)) {
+			// use the cache path from the project instead of the default if we're in non-production mode
+			$phptal->setPhpCodeDestination(ProjectStreamWrapper::getProjectName() . '://cache');
+		}
 
 		foreach($response->getParams() as $key => $value) {
 			$phptal->set($key, $value);

@@ -161,11 +161,15 @@ abstract class PdoDataMapper implements IDataMapper {
 		return $this->query('DELETE FROM ' . $table . ' WHERE id = ? LIMIT 1;', [$id]);
 	}
 
+	protected final function findByCondition($model, $keys, $operators, $values, array $options = []) {
+		return $this->findByKey($model, $keys, $values, array_merge(['operators' => $operators], $options));
+	}
 	protected final function findByKey($model, $keys, $values, array $options = []) {
-		$options = array_merge($options, [
+		$options = array_merge([
 			'limit' => 0,
-			'projection' => []
-		]);
+			'projection' => [],
+			'operators' => []
+		], $options);
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
@@ -177,19 +181,18 @@ abstract class PdoDataMapper implements IDataMapper {
 		}
 		// finding by an array of keys should always use an AND-joined where clause
 		$keys = array_map(function ($key) { return $this->mung($key); }, $keys);
-		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND']);
+		$slots = $this->genSlots(['type' => 'where', 'keys' => $keys, 'link' => 'AND', 'operators' => $options['operators']]);
 		return $this->query('SELECT ' . $this->genSlots(['type' => 'fields', 'keys' => $projection]) .
 			' FROM ' . $this->mung($this->getClassname($model)) . ' WHERE ' . $slots . $limit . ';', array_combine($keys, $values), $model);
-
 	}
 	protected final function findById($model, $id, array $projection = []) {
 		return $this->findByKey($model, 'id', $id, ['limit' => 1, 'projection' => $projection]);
 	}
 	protected final function findAll($model, array $options = []) {
-		$options = array_merge($options, [
+		$options = array_merge([
 			'limit' => 0,
 			'projection' => []
-		]);
+		], $options);
 		$limit = $options['limit'] > 0 ? ' LIMIT ' . $options['limit'] : '';
 		$projection = $options['projection'];
 		$projection = empty($projection) ? array_keys(get_class_vars($model)) : $projection;
@@ -197,7 +200,7 @@ abstract class PdoDataMapper implements IDataMapper {
 			' FROM ' . $this->mung($this->getClassname($model)) . $limit . ';', [], $model);
 	}
 	protected final function query($sql, array $params, $model = '') {
-		$this->logger->debug('Running SQL: ' . $sql);
+		$this->logger->debug('Running SQL: ' . $sql . ' for data ' . var_export($params, true));
 		$query = $this->db->prepare($sql);
 		if(!empty($model)) {
 			if(!$query->setFetchMode(self::FETCH_CLASS | self::FETCH_PROPS_LATE, $model)) {
@@ -218,7 +221,7 @@ abstract class PdoDataMapper implements IDataMapper {
 		return lcfirst(preg_replace_callback('/_([a-z])/', function ($m) { return strtoupper($m[1]); }, $thing));
 	}
 	public static final function genSlots(array $opts) {
-		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'link' => 'AND', 'rename' => true], $opts);
+		$opts = array_merge(['type' => 'placeholders', 'keys' => [], 'link' => 'AND', 'rename' => true, 'operators' => []], $opts);
 		$returns = [
 			'update' => function () use($opts) {
 				return substr(array_reduce($opts['keys'], function (&$result, $k) { $result .= '`' . $k . '` = :' . self::unmung($k) . ', '; return $result; }, ''), 0, -2);
@@ -228,8 +231,10 @@ abstract class PdoDataMapper implements IDataMapper {
 			},
 			'where' => function () use($opts) {
 				$j = $opts['link'];
+				$o = empty($opts['operators']) ? array_fill(0, count($opts['keys']), '=') : $opts['operators'];
 				$sub = -1*(strlen($j)+2);
-				return substr(array_reduce($opts['keys'], function (&$result, $k) use($j) { $result .= '`' . $k . '` = :' . $k . ' ' . $j . ' '; return $result; }, ''), 0, $sub);
+				$c = 0;
+				return substr(array_reduce($opts['keys'], function (&$result, $k) use($j, $o, &$c) { $result .= '`' . $k . '` ' . $o[$c++] . ' :' . $k . ' ' . $j . ' '; return $result; }, ''), 0, $sub);
 			},
 			'placeholders' => function () use($opts) {
 				return substr(str_repeat('?, ', count($opts['keys'])), 0, -2);
